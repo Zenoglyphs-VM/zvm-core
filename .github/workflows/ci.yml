@@ -21,3 +21,81 @@ jobs:
       - run: go build ./...
       - run: go vet ./...
       - run: go test ./...
+
+  node-chunk-read-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 5GiB
+      GOWORK: 'off'
+      GOTOOLCHAIN: local
+      GOFLAGS: -mod=readonly
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: candidate
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: edgepillar/zvm-node
+          ref: 86a254841276ede899b22379a9cdea4f9632465a
+          path: node-consumer
+          submodules: true
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: Zenoglyphs-VM/zvm-core
+          ref: 29e6d9b30be94de3772c850c7a1e9811585a8833
+          path: core-baseline
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: candidate/go.mod
+          cache-dependency-path: |
+            candidate/go.sum
+            node-consumer/go.sum
+      - name: Check source and negative-result refusal controls
+        run: python3 candidate/scripts/qualify-node-chunk-reads.py self-test
+      - name: Declare the exact test-only consumer override
+        run: |
+          mkdir "$RUNNER_TEMP/core-chunk-consumer"
+          python3 candidate/scripts/qualify-node-chunk-reads.py prepare --core candidate --node node-consumer --baseline core-baseline --output "$RUNNER_TEMP/core-chunk-consumer"
+      - name: Compile the original-Core negative consumer once
+        working-directory: node-consumer
+        run: timeout 12m go test -c -p=2 -tags=fullclient_recovery -modfile "$RUNNER_TEMP/core-chunk-consumer/baseline.mod" -o "$RUNNER_TEMP/core-chunk-consumer/baseline.test" ./orderbook
+      - name: Require actual engine advancement with the original swallowed read error
+        working-directory: node-consumer/orderbook
+        run: |
+          set +e
+          go tool test2json -p github.com/Zenoglyphs-VM/zvm-node/orderbook -t             "$RUNNER_TEMP/core-chunk-consumer/baseline.test" -test.v=test2json -test.failfast -test.timeout=2m             -test.run='^TestCoreChunkReadFullClientRecovery$/^invalid-author$' > "$RUNNER_TEMP/core-chunk-consumer/baseline.jsonl" 2>&1
+          actual_exit=$?
+          set -e
+          cat "$RUNNER_TEMP/core-chunk-consumer/baseline.jsonl"
+          python3 ../../candidate/scripts/qualify-node-chunk-reads.py check-red --log "$RUNNER_TEMP/core-chunk-consumer/baseline.jsonl" --actual-exit "$actual_exit"
+      - name: Compile the candidate-Core consumer once
+        working-directory: node-consumer
+        run: timeout 12m go test -c -p=2 -tags=fullclient_recovery -modfile "$RUNNER_TEMP/core-chunk-consumer/candidate.mod" -o "$RUNNER_TEMP/core-chunk-consumer/candidate.test" ./orderbook
+      - name: Preserve real catalyst refusal and all original default-persistence cases
+        working-directory: node-consumer/orderbook
+        run: |
+          go tool test2json -p github.com/Zenoglyphs-VM/zvm-node/orderbook -t             "$RUNNER_TEMP/core-chunk-consumer/candidate.test" -test.v=test2json -test.failfast -test.timeout=7m             -test.run='^TestFullClientDefaultPersistenceRecovery$'
+      - name: Preserve all original signed-order and paired-backup cases
+        working-directory: node-consumer/orderbook
+        run: |
+          go tool test2json -p github.com/Zenoglyphs-VM/zvm-node/orderbook -t             "$RUNNER_TEMP/core-chunk-consumer/candidate.test" -test.v=test2json -test.failfast -test.timeout=4m             -test.run='^TestFullClientSignedOrderRecovery$'
+      - name: Preserve all original index and book write boundaries
+        working-directory: node-consumer/orderbook
+        run: |
+          go tool test2json -p github.com/Zenoglyphs-VM/zvm-node/orderbook -t             "$RUNNER_TEMP/core-chunk-consumer/candidate.test" -test.v=test2json -test.failfast -test.timeout=3m             -test.run='^TestFullClientSignedWriteBoundaryRecovery$'
+      - name: Preserve all original signed rewind boundaries
+        working-directory: node-consumer/orderbook
+        run: |
+          go tool test2json -p github.com/Zenoglyphs-VM/zvm-node/orderbook -t             "$RUNNER_TEMP/core-chunk-consumer/candidate.test" -test.v=test2json -test.failfast -test.timeout=4m             -test.run='^TestFullClientSignedRewindRecovery$'
+      - name: Require chunk-read halt retry and independent paired recovery
+        working-directory: node-consumer/orderbook
+        run: |
+          go tool test2json -p github.com/Zenoglyphs-VM/zvm-node/orderbook -t             "$RUNNER_TEMP/core-chunk-consumer/candidate.test" -test.v=test2json -test.failfast -test.timeout=6m             -test.run='^TestCoreChunkReadFullClientRecovery$'
+      - name: Refuse undeclared consumer or dependency changes after actual execution
+        if: always()
+        run: python3 candidate/scripts/qualify-node-chunk-reads.py verify --core candidate --node node-consumer --baseline core-baseline --output "$RUNNER_TEMP/core-chunk-consumer"
