@@ -214,9 +214,13 @@ fn call(
     let mut evm = OpEvm::new(ctx, ());
     // The production REVM system handler skips admission, intrinsic gas,
     // caller deduction, nonce increments and beneficiary fee rewards.
-    let result = MainnetHandler::default()
-        .run_system_call(&mut evm.0)
-        .expect("actual system handler failed");
+    let result = MainnetHandler::<
+        _,
+        revm::context_interface::result::EVMError<core::convert::Infallible>,
+        _,
+    >::default()
+    .run_system_call(&mut evm.0)
+    .expect("actual system handler failed");
     let ok = result.is_success();
     let reverted = matches!(&result, ExecutionResult::Revert { .. });
     let output = result.output().map(|v| v.to_vec()).unwrap_or_default();
