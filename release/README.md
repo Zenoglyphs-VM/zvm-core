@@ -35,6 +35,13 @@ Contract entries contain `id`, lowercase `address`, `runtimeFile` and
 with an optional lowercase `0x` prefix and surrounding whitespace. Its decoded
 EVM keccak256 must match `runtimeCodeHash`; raw file bytes are separately pinned
 with SHA-256. Genesis predeploy code must also agree with the L2 allocation.
+The pinned L2 genesis JSON must also be valid UTF-8 and have no duplicate
+object members, including escaped equivalent names and ignored nested objects.
+It retains its 16 MiB byte limit and uses the existing bounded JSON walk before
+the upstream genesis decoder. Matching decoded block hashes or execution rules,
+valid file digests and trusted signatures cannot excuse ambiguous input bytes.
+This input check does not establish constructor execution, deployment provenance,
+independent NoM/finality authority or real release acceptance.
 The pinned deployment bindings file is `{schema: 1, contracts: [...]}` with the
 same contract records. It records expected code and does not prove live code.
 
