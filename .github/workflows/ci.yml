@@ -29,20 +29,8 @@ jobs:
           python3 -B scripts/ci-owned-go-cache.py prepare
           printf '%s\n' "GOCACHE=$GOCACHE" >> "$GITHUB_ENV"
 
-      - run: go build -p=2 ./...
-      - run: go vet -p=2 ./...
-      - name: Check the exact original genesis verifier against all new controls
-        run: python3 -B scripts/check-genesis-json-original.py
-      - name: Test the complete current source without cached test results
-        run: go test -p=2 -json -count=1 ./...
-      - name: Check the complete release package with the race detector
-        run: go test -p=2 -race -json -count=1 -timeout=5m ./release/...
-      - name: Prepare complete source-genesis system-hook fixtures and Go reference
-        run: go run ./tools/system-predeploy-fixtures "$RUNNER_TEMP/system-predeploy-input.json"
-      - name: Build the static complete-client qualification driver
-        env:
-          CGO_ENABLED: "0"
-        run: go build -p=2 -trimpath -o "$RUNNER_TEMP/connected-client-check" ./tools/connected-client-check
+      - name: Run all original Go controls and prepare outputs within the measured disk budget
+        run: python3 -B scripts/check-core-go-phase.py
       - name: Release only this job's completed disposable Go compiler cache
         run: python3 -B scripts/ci-owned-go-cache.py release
       - name: Check hosted system-qualification disk budget

@@ -8,13 +8,14 @@ assert os.environ['GOCACHE']==str(cache)
 action=sys.argv[1];assert action in ['prepare','release']
 free=shutil.disk_usage(temp).free
 if action=='prepare':
-    assert free>=14<<30,'10 GiB floor plus 4 GiB Go allocation is required'
+    print('OWNED-GO-CACHE-ADMISSION '+json.dumps({'freeBytes':free,'minimumFreeBytes':10<<30,'expectedGoBytes':3<<30},sort_keys=True),flush=True)
+    assert free>=13<<30,'10 GiB floor plus 3 GiB monitored Go allocation is required'
     cache.mkdir(mode=0o700)
     info=cache.lstat();record={'schema':1,'run':os.environ['GITHUB_RUN_ID'],'attempt':os.environ['GITHUB_RUN_ATTEMPT'],
         'head':os.environ['GITHUB_SHA'],'name':name,'device':info.st_dev,'inode':info.st_ino,
         'disposable':True,'contains_historical_inputs_or_test_evidence':False}
     with receipt.open('x') as f:json.dump(record,f,sort_keys=True);f.write('\n')
-    print('OWNED-GO-CACHE-PREPARED '+json.dumps({'disposable':True,'freshDirectory':True,'freeBytes':free,'minimumFreeBytes':10<<30,'expectedGoBytes':4<<30},sort_keys=True))
+    print('OWNED-GO-CACHE-PREPARED '+json.dumps({'disposable':True,'freshDirectory':True,'freeBytes':free,'minimumFreeBytes':10<<30,'expectedGoBytes':3<<30},sort_keys=True))
 else:
     assert receipt.is_file() and not receipt.is_symlink()
     record=json.loads(receipt.read_bytes());info=cache.lstat()

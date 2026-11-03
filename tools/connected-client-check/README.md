@@ -44,3 +44,13 @@ flows, signed transaction admission, a second independent client, default-scale
 workloads, operating-system portability, owner acceptance, or a production release.
 Container execution is qualification, not an operator deployment or a change to
 the shipped client-image defaults. Production acceptance remains `NO_GO`.
+
+The Go prefix executes the same seven build, vet, original-file negative,
+normal/race and output-preparation commands through one foreground controller.
+Its 3 GiB budget is enforced with 100 ms disk samples, command/output caps,
+actual exit and stream hashes, and an eight-minute phase deadline. The basis is
+an earlier 2,320,666,624-byte free-space drawdown after output preparation; that
+observation is not a transient peak measurement. Admission retains the unchanged
+10 GiB floor plus the full 3 GiB budget. Crossing either bound stops the owned
+process group and preserves failure status. No system/historical cache is deleted
+to satisfy admission. This monitor is not an OS-enforced aggregate disk quota.
