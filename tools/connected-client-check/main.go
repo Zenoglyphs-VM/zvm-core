@@ -162,6 +162,7 @@ func exercise(ctx context.Context, name, root string) {
 
 func main() {
 	check(len(os.Args) == 2, "one fresh qualification directory required")
+	verifySandbox()
 	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Minute)
 	defer cancel()
 	version, err := exec.CommandContext(ctx, "/usr/local/bin/op-reth", "--version").CombinedOutput()
@@ -174,6 +175,7 @@ func main() {
 	must(err)
 	must(f.Close())
 	check(n > 0 && n < 512<<20, "client binary size differs")
+	check(n == 101744960 && hex.EncodeToString(h.Sum(nil)) == "3dc4a63aa83daa5ee015386b5e961ce09d01bb54da309af8401ccb4739cfdbc1", "pinned client executable differs")
 	output("BINARY", map[string]any{"version": string(version), "sha256": hex.EncodeToString(h.Sum(nil)), "bytes": n, "independentBuildProvenance": false})
 	root := os.Args[1]
 	must(os.Mkdir(root, 0700))
