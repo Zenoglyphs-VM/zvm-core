@@ -34,7 +34,7 @@ argv=['docker','run','--name',name,'--user',str(os.getuid())+':'+str(os.getgid()
     '--mount','type=bind,src='+str(ROOT/'chains')+',dst=/source/chains,readonly',
     '--mount','type=bind,src='+str(binary)+',dst=/qualification,readonly',
     '--mount','type=bind,src='+str(data)+',dst=/data','--workdir','/source','--env','GOMAXPROCS=2',
-    '--env','HOME=/data/home','--env','XDG_CACHE_HOME=/data/cache','--entrypoint','/qualification',image,'/data/chains']
+    '--env','XDG_DATA_HOME=/data/state','--env','XDG_CONFIG_HOME=/data/config','--env','XDG_CACHE_HOME=/data/cache','--entrypoint','/qualification',image,'/data/chains']
 process=subprocess.Popen(argv,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
 captured=bytearray();failures=[]
 def read():

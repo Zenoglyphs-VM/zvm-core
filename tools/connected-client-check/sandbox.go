@@ -45,9 +45,10 @@ func verifySandbox() {
 		}
 	}
 	check(rootReadOnly && inputsReadOnly, "container root or chain inputs are writable")
-	check(os.Getenv("HOME") == "/data/home" && os.Getenv("XDG_CACHE_HOME") == "/data/cache", "client home is outside owned data")
-	must(os.Mkdir("/data/home", 0700))
-	must(os.Mkdir("/data/cache", 0700))
+	for key, path := range map[string]string{"XDG_DATA_HOME": "/data/state", "XDG_CONFIG_HOME": "/data/config", "XDG_CACHE_HOME": "/data/cache"} {
+		check(os.Getenv(key) == path, "client data directory is outside owned data")
+		must(os.Mkdir(path, 0700))
+	}
 	output("SANDBOX", map[string]any{"nonRootOwner": true, "loopbackOnly": true, "readOnlyRoot": true,
-		"readOnlyPublicChainInputsOnly": true, "gitMetadataAbsent": true, "GitHubCredentialVariablesAbsent": true, "homeInsideOwnedData": true})
+		"readOnlyPublicChainInputsOnly": true, "gitMetadataAbsent": true, "GitHubCredentialVariablesAbsent": true, "dataDirectoriesOwned": true})
 }
