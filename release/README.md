@@ -350,3 +350,23 @@ and `runtimeObserved: false`. Saved material consistency and deterministic sourc
 assembly do not establish fresh compiler provenance, actual constructor state,
 canonical deployment, system-call/block processing, supported-platform or
 independent operator/release acceptance. No real policy, key or release is shipped.
+
+
+The successful receipt also contains `genesisAllocation`: the verified block
+hash and complete state root, plus all supported predeploy accounts in name
+order. Each account records its address, decimal-string nonce and balance,
+complete runtime-code hash and sorted nonzero storage slots. Empty storage is
+an empty array. Zero-valued slots are omitted because the state trie does not
+distinguish them from absent slots. Decimal strings preserve exact integers in
+JSON consumers. Only known predeploy accounts are described; the complete state
+root remains the commitment to the entire signed allocation.
+
+This field is emitted after all existing verification predicates succeed. A
+second bounded read verifies the original signed genesis byte pin before the
+description is constructed. It does not change manifest or signing schema one,
+genesis construction, chain configuration or the installed accounts. Failed
+verification returns an empty receipt. The explicit installation label is
+`supported-genesis-allocation`, and `constructorExecutionObserved` is false.
+Preinstalled runtime code is not evidence that its constructor ran. Connecting
+these account states to a reviewed constructor or historical installation recipe
+and accepting a real release remain separate requirements.
