@@ -12,12 +12,18 @@ jobs:
   go:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      GOCACHE: ${{ runner.temp }}/zvm-owned-go-cache-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+          cache: false
+
+      - name: Prepare this job's fresh disposable Go compiler cache
+        run: python3 -B scripts/ci-owned-go-cache.py prepare
 
       - run: go build -p=2 ./...
       - run: go vet -p=2 ./...
@@ -27,10 +33,16 @@ jobs:
         run: go test -p=2 -json -count=1 ./...
       - name: Check the complete release package with the race detector
         run: go test -p=2 -race -json -count=1 -timeout=5m ./release/...
-      - name: Check hosted system-qualification disk budget
-        run: python3 -c "import os,shutil; assert shutil.disk_usage(os.environ['RUNNER_TEMP']).free >= (12 << 30)"
       - name: Prepare complete source-genesis system-hook fixtures and Go reference
         run: go run ./tools/system-predeploy-fixtures "$RUNNER_TEMP/system-predeploy-input.json"
+      - name: Build the static complete-client qualification driver
+        env:
+          CGO_ENABLED: "0"
+        run: go build -p=2 -trimpath -o "$RUNNER_TEMP/connected-client-check" ./tools/connected-client-check
+      - name: Release only this job's completed disposable Go compiler cache
+        run: python3 -B scripts/ci-owned-go-cache.py release
+      - name: Check hosted system-qualification disk budget
+        run: python3 -c "import json,os,shutil; free=shutil.disk_usage(os.environ['RUNNER_TEMP']).free; print('NATIVE-CI-DISK '+json.dumps({'freeBytes':free,'minimumFreeBytes':10<<30,'expectedNativeBytes':2<<30})); assert free >= (12 << 30)"
       - name: Select the pinned Rust compiler for the native OP system checker
         run: |
           rustup toolchain install 1.95.0 --profile minimal
@@ -44,10 +56,6 @@ jobs:
         run: cargo +1.95.0 build --release --locked --jobs 2 --manifest-path tools/system-predeploy-check/Cargo.toml
       - name: Execute all four native system-call profiles and deliberate refusal controls
         run: python3 -B scripts/check-system-predeploys.py --input "$RUNNER_TEMP/system-predeploy-input.json" --binary "$RUNNER_TEMP/system-predeploy-target/release/zvm-system-predeploy-check"
-      - name: Build the static complete-client qualification driver
-        env:
-          CGO_ENABLED: "0"
-        run: go build -p=2 -trimpath -o "$RUNNER_TEMP/connected-client-check" ./tools/connected-client-check
       - name: Qualify four connected profiles through the pinned complete OP client
         run: python3 -B scripts/check-connected-client.py "$RUNNER_TEMP/connected-client-check"
       - name: Verify controlled source restoration

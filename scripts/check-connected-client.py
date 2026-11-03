@@ -6,7 +6,7 @@ lock=json.loads((ROOT/'tools/connected-client-check/image.lock.json').read_bytes
 image=lock['repository']+'@'+lock['platformManifestDigest']
 root=pathlib.Path(os.environ['RUNNER_TEMP'])/'connected-client-qualification'
 root.mkdir(mode=0o700)
-assert shutil.disk_usage(root).free >= 14<<30
+assert shutil.disk_usage(root).free >= 12<<30
 def run(argv,cap=128<<10,timeout=90):
     result=subprocess.run(argv,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=timeout)
     assert len(result.stdout)<=cap,'command output cap exceeded'
@@ -51,6 +51,15 @@ try:
         if failures:raise RuntimeError(failures[0])
         assert time.monotonic()<deadline,'complete-client wall deadline exceeded'
         assert shutil.disk_usage(root).free>=10<<30,'hosted free-space floor reached'
+        allocated=0
+        for directory,subdirs,names in os.walk(data,followlinks=False):
+            for part in subdirs:
+                assert not (pathlib.Path(directory)/part).is_symlink(),'unexpected generated-data link'
+            for part in names:
+                entry=(pathlib.Path(directory)/part).lstat()
+                assert not __import__('stat').S_ISLNK(entry.st_mode),'unexpected generated-data link'
+                allocated+=entry.st_blocks*512
+        assert allocated<=512<<20,'generated client-data allocation cap exceeded'
         time.sleep(.5)
     reader.join(timeout=5);assert not reader.is_alive() and not failures
     assert process.returncode==0,('actual complete-client exit',process.returncode)

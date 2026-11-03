@@ -28,8 +28,13 @@ Engine API access is refused. No invalid forced transaction is dropped or retrie
 CI builds a static qualification driver with the repository's pinned Go module
 graph. It runs the positive cohort once, with two CPUs, a 4 GiB memory limit,
 256 processes, read-only source/image, bounded diagnostics and a seven-minute
-deadline. Admission reserves 4 GiB above a 10 GiB free-space floor; the floor is
-monitored during execution. Client databases are private ephemeral CI fixtures.
+deadline. Admission reserves 2 GiB above a 10 GiB free-space floor; the floor and a
+512 MiB generated client-data allocation cap are monitored during execution.
+Go uses a new, explicitly disposable cache for this hosted job. After the Go
+controls, fixture preparation and static driver build succeed, only that owned
+cache is released before Rust compilation; its receipt and test logs remain.
+Setup does not restore a second Go build cache. Historical/local caches are
+untouched. Client databases are private ephemeral CI fixtures.
 The image is pulled only in hosted CI; local source review does not pull it or
 start Docker. The original complete Go, race and native system-hook lanes remain.
 
