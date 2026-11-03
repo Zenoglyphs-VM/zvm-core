@@ -11,6 +11,7 @@ permissions:
 jobs:
   go:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -26,5 +27,22 @@ jobs:
         run: go test -p=2 -json -count=1 ./...
       - name: Check the complete release package with the race detector
         run: go test -p=2 -race -json -count=1 -timeout=5m ./release/...
+      - name: Check hosted system-qualification disk budget
+        run: python3 -c "import os,shutil; assert shutil.disk_usage(os.environ['RUNNER_TEMP']).free >= (12 << 30)"
+      - name: Prepare complete source-genesis system-hook fixtures and Go reference
+        run: go run ./tools/system-predeploy-fixtures "$RUNNER_TEMP/system-predeploy-input.json"
+      - name: Select the pinned Rust compiler for the native OP system checker
+        run: |
+          rustup toolchain install 1.95.0 --profile minimal
+          rustc +1.95.0 --version
+      - name: Acquire only the three source-locked OP modules
+        run: python3 -B scripts/acquire-system-predeploy-sources.py "$RUNNER_TEMP/system-predeploy-op-source"
+      - name: Build the bounded native system-call checker from the dependency lock
+        env:
+          ZVM_OP_REVM_SOURCES: ${{ runner.temp }}/system-predeploy-op-source
+          CARGO_TARGET_DIR: ${{ runner.temp }}/system-predeploy-target
+        run: cargo +1.95.0 build --release --locked --jobs 2 --manifest-path tools/system-predeploy-check/Cargo.toml
+      - name: Execute all four native system-call profiles and deliberate refusal controls
+        run: python3 -B scripts/check-system-predeploys.py --input "$RUNNER_TEMP/system-predeploy-input.json" --binary "$RUNNER_TEMP/system-predeploy-target/release/zvm-system-predeploy-check"
       - name: Verify controlled source restoration
         run: git diff --exit-code

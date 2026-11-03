@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "repository": "https://github.com/ethereum-optimism/optimism",
+  "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+  "tag": "op-reth/v2.6.1",
+  "workspaceLockSha256": "7c257b147f0329408fb2b9ebf4b7f30ccfaca6118920c34caf3b887bb2fa692f",
+  "sourceDirectory": "rust/op-revm/src",
+  "files": {
+    "spec.rs": "5021472d4701842a0fe0a672c74195c08418f218788cf9eb69cd2b95dfe7ce4b",
+    "precompiles.rs": "42baddddc64ff94276e6e9b597351f664e329279cc47577c55d71f4aeca0f6e8",
+    "evm.rs": "439345df3af59715e8849c6f89f0ac12e92be348a736fddf8b2270903de0ee2f"
+  },
+  "scope": "Exact OP hardfork mapping, precompile provider and generic frame EVM wrapper. Transaction admission, fees, deposits, derivation and full op-reth client behavior are outside this runner."
+}
