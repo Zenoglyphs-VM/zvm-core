@@ -12,8 +12,6 @@ jobs:
   go:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    env:
-      GOCACHE: ${{ runner.temp }}/zvm-owned-go-cache-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
 
@@ -23,7 +21,11 @@ jobs:
           cache: false
 
       - name: Prepare this job's fresh disposable Go compiler cache
-        run: python3 -B scripts/ci-owned-go-cache.py prepare
+        env:
+          GOCACHE: ${{ runner.temp }}/zvm-owned-go-cache-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          python3 -B scripts/ci-owned-go-cache.py prepare
+          printf '%s\n' "GOCACHE=$GOCACHE" >> "$GITHUB_ENV"
 
       - run: go build -p=2 ./...
       - run: go vet -p=2 ./...
