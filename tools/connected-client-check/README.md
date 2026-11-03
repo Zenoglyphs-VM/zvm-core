@@ -54,3 +54,12 @@ observation is not a transient peak measurement. Admission retains the unchanged
 10 GiB floor plus the full 3 GiB budget. Crossing either bound stops the owned
 process group and preserves failure status. No system/historical cache is deleted
 to satisfy admission. This monitor is not an OS-enforced aggregate disk quota.
+
+The Engine client selects `engine_getPayloadV4` for Isthmus and
+`engine_getPayloadV5` for Karst/Osaka from the explicit rollup profile.
+`engine_forkchoiceUpdatedV3` and `engine_newPayloadV4` are unchanged. The legacy
+three-argument dialer keeps Isthmus behavior for existing callers. Configured
+Karst callers must use `DialEngineForConfig`; RPC errors are returned without
+retrying or downgrading. The selector does not change genesis, payload attributes,
+planned transactions, complete-state or receipt predicates. Node dependency and
+caller adoption remain separate from this Core qualification.

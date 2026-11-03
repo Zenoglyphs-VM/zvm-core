@@ -92,7 +92,7 @@ func exercise(ctx context.Context, name, root string) {
 	head := cfg.L2GenesisHash
 	run := startClient(ctx, dir)
 	defer func() { run.stop() }()
-	e, err := l2.DialEngine(ctx, "http://127.0.0.1:8551", secret)
+	e, err := l2.DialEngineForConfig(ctx, "http://127.0.0.1:8551", secret, cfg)
 	must(err)
 	defer e.Close()
 	c, err := rpc.DialContext(ctx, "http://127.0.0.1:8545")
