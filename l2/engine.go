@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/Zenoglyphs-VM/zvm-core/rollup"
 	"github.com/ethereum/go-ethereum/beacon/engine"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -19,10 +20,11 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
-// Engine is an authenticated Engine API client. The ZVM targets Isthmus
-// (Prague) payloads: forkchoiceUpdatedV3, getPayloadV4, newPayloadV4.
+// Engine is an authenticated Engine API client. Isthmus retrieves payloads
+// with V4; Karst/Osaka requires V5. Fork choice stays V3 and new payload stays V4.
 type Engine struct {
-	c *rpc.Client
+	c                *rpc.Client
+	getPayloadMethod string
 }
 
 func ReadJWTSecret(path string) ([32]byte, error) {
@@ -40,12 +42,34 @@ func ReadJWTSecret(path string) ([32]byte, error) {
 	return secret, nil
 }
 
+// DialEngine preserves the legacy Isthmus payload API. Chains with an explicit
+// execution profile should use DialEngineForConfig.
 func DialEngine(ctx context.Context, url string, secret [32]byte) (*Engine, error) {
+	return dialEngine(ctx, url, secret, "engine_getPayloadV4")
+}
+
+// DialEngineForConfig selects the API for this chain's configured execution
+// profile. The choice is immutable and errors never cause an API downgrade.
+func DialEngineForConfig(ctx context.Context, url string, secret [32]byte, cfg *rollup.Config) (*Engine, error) {
+	if cfg == nil {
+		return nil, errors.New("rollup configuration is required for the Engine payload API")
+	}
+	switch cfg.EVM {
+	case "", rollup.EVMIsthmus:
+		return dialEngine(ctx, url, secret, "engine_getPayloadV4")
+	case rollup.EVMKarst:
+		return dialEngine(ctx, url, secret, "engine_getPayloadV5")
+	default:
+		return nil, fmt.Errorf("unsupported Engine execution profile %q", cfg.EVM)
+	}
+}
+
+func dialEngine(ctx context.Context, url string, secret [32]byte, method string) (*Engine, error) {
 	c, err := rpc.DialOptions(ctx, url, rpc.WithHTTPAuth(node.NewJWTAuth(secret)))
 	if err != nil {
 		return nil, err
 	}
-	return &Engine{c: c}, nil
+	return &Engine{c: c, getPayloadMethod: method}, nil
 }
 
 func (e *Engine) Close() { e.c.Close() }
@@ -60,7 +84,11 @@ func (e *Engine) ForkchoiceUpdated(ctx context.Context, state engine.ForkchoiceS
 
 func (e *Engine) GetPayload(ctx context.Context, id engine.PayloadID) (*engine.ExecutionPayloadEnvelope, error) {
 	var res engine.ExecutionPayloadEnvelope
-	if err := e.c.CallContext(ctx, &res, "engine_getPayloadV4", id); err != nil {
+	method := e.getPayloadMethod
+	if method == "" {
+		method = "engine_getPayloadV4"
+	}
+	if err := e.c.CallContext(ctx, &res, method, id); err != nil {
 		return nil, err
 	}
 	return &res, nil

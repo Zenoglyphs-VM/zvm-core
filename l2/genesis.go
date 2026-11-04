@@ -166,6 +166,12 @@ func ExtraData(cfg *rollup.Config) []byte {
 // the ZVM entered through the bridge vault, so L2 supply can be audited
 // against the vault's L1 balance.
 func BuildGenesis(cfg *rollup.Config, timestamp uint64) (*core.Genesis, error) {
+	if cfg == nil {
+		return nil, fmt.Errorf("genesis needs a rollup configuration")
+	}
+	if err := cfg.PredeployState.Validate(); err != nil {
+		return nil, err
+	}
 	alloc := types.GenesisAlloc{}
 	for _, p := range predeploys {
 		code, err := predeployCode(p.name)
@@ -192,6 +198,9 @@ func BuildGenesis(cfg *rollup.Config, timestamp uint64) (*core.Genesis, error) {
 			acct.Storage = storage
 			alloc[rollup.BridgeAddr] = acct
 		}
+	}
+	if err := installPredeployState(cfg, alloc); err != nil {
+		return nil, err
 	}
 	zero := uint64(0)
 	return &core.Genesis{

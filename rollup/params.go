@@ -3,9 +3,11 @@
 package rollup
 
 import (
+	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math"
 	"math/big"
 	"os"
@@ -192,6 +194,10 @@ type Config struct {
 	// "karst" (Osaka, Jovian's minimum base fee — op-reth only). Empty means
 	// isthmus, which is every chain written before the name existed.
 	EVM string `json:"evm,omitempty"`
+
+	// PredeployState selects a separately accepted genesis-state recipe.
+	// Omitted keeps every existing preinstallation byte and nonce unchanged.
+	PredeployState PredeployState `json:"predeployState,omitempty"`
 	// MinBaseFee is Jovian's floor under EIP-1559's base fee, in wei. Only
 	// meaningful on karst; zero leaves the base fee to decay as before.
 	MinBaseFee uint64 `json:"minBaseFee,omitempty"`
@@ -376,26 +382,52 @@ func (c *Config) MomentumForL2Block(number uint64) uint64 {
 	return c.L1StartHeight + number - 1
 }
 
+// decodeConfigJSON accepts one complete value with no unknown struct fields.
+// Custom decoders must use it too: DisallowUnknownFields does not inspect the
+// object consumed by a nested UnmarshalJSON method.
+func decodeConfigJSON(raw []byte, out any) error {
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(out); err != nil {
+		return err
+	}
+	if err := decoder.Decode(new(any)); err != io.EOF {
+		if err != nil {
+			return fmt.Errorf("trailing configuration data: %w", err)
+		}
+		return fmt.Errorf("trailing configuration value")
+	}
+	return nil
+}
+
 func Load(path string) (*Config, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
+	return parse(raw, path)
+}
+
+// Parse validates the same complete configuration as Load, from retained
+// bytes. Offline release verification must not reopen a different path.
+func Parse(raw []byte) (*Config, error) { return parse(raw, "rollup") }
+
+func parse(raw []byte, label string) (*Config, error) {
 	var c Config
-	if err := json.Unmarshal(raw, &c); err != nil {
-		return nil, fmt.Errorf("%s: %w", path, err)
+	if err := decodeConfigJSON(raw, &c); err != nil {
+		return nil, fmt.Errorf("%s: %w", label, err)
 	}
 	if c.L1StartHeight == 0 || c.GasLimit == 0 || c.L2ChainID == 0 {
-		return nil, fmt.Errorf("%s: incomplete rollup config", path)
+		return nil, fmt.Errorf("%s: incomplete rollup config", label)
 	}
 	if err := c.Fee.prepare(); err != nil {
-		return nil, fmt.Errorf("%s: %w", path, err)
+		return nil, fmt.Errorf("%s: %w", label, err)
 	}
 	if c.Fee.Active(c.L1StartHeight) && c.MaxDepositCallGas == 0 {
-		return nil, fmt.Errorf("%s: maxDepositCallGas is required once the fee rule is active", path)
+		return nil, fmt.Errorf("%s: maxDepositCallGas is required once the fee rule is active", label)
 	}
 	if err := c.CheckForks(); err != nil {
-		return nil, fmt.Errorf("%s: %w", path, err)
+		return nil, fmt.Errorf("%s: %w", label, err)
 	}
 	return &c, nil
 }
@@ -405,6 +437,9 @@ func Load(path string) (*Config, error) {
 // of these would derive a different chain from its peers at the fork height,
 // which is the one failure this check exists to prevent.
 func (c *Config) CheckForks() error {
+	if err := c.PredeployState.Validate(); err != nil {
+		return err
+	}
 	switch c.EVM {
 	case "", EVMIsthmus, EVMKarst:
 	default:
