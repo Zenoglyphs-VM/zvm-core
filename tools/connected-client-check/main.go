@@ -40,7 +40,13 @@ func digest(raw []byte) string { sum := sha256.Sum256(raw); return hex.EncodeToS
 func output(label string, value any) {
 	raw, err := json.Marshal(value)
 	must(err)
-	fmt.Printf("CONNECTED-CLIENT-%s %s\n", label, raw)
+	prefix := "CONNECTED-CLIENT"
+	if record, ok := value.(map[string]any); ok {
+		if profile, ok := record["profile"].(string); ok && strings.HasPrefix(profile, selectedPrefix) {
+			prefix = "CONSTRUCTOR-CLIENT"
+		}
+	}
+	fmt.Printf("%s-%s %s\n", prefix, label, raw)
 }
 
 var depositor = common.HexToAddress("0x00000000000000000000000000000000000a11ce")
@@ -64,20 +70,25 @@ func buildPlan(cfg *rollup.Config, name string, number uint64) (*derive.Plan, *b
 }
 
 func exercise(ctx context.Context, name, root string) {
-	path := name
-	if name == "supported-isthmus" {
+	selected := strings.HasPrefix(name, selectedPrefix)
+	sourceName := strings.TrimPrefix(name, selectedPrefix)
+	path := sourceName
+	if sourceName == "supported-isthmus" {
 		path = "l2"
 	}
 	raw, err := os.ReadFile("chains/" + path + "/rollup.json")
 	must(err)
 	cfg, err := rollup.Parse(raw)
 	must(err)
-	if name == "supported-isthmus" {
+	if sourceName == "supported-isthmus" {
 		cfg.EVM = "isthmus"
+	}
+	if selected {
+		cfg.PredeployState = rollup.PredeployStateConstructorsV1
 	}
 	g, err := l2.BuildGenesis(cfg, cfg.L2GenesisTimestamp)
 	must(err)
-	if name == "supported-isthmus" {
+	if sourceName == "supported-isthmus" || selected {
 		cfg.L2GenesisHash = g.ToBlock().Hash()
 	}
 	check(g.ToBlock().Hash() == cfg.L2GenesisHash && len(g.Alloc) == 12, "source genesis differs")
@@ -99,6 +110,9 @@ func exercise(ctx context.Context, name, root string) {
 	must(err)
 	defer c.Close()
 	checkGenesis(ctx, c, g)
+	if selected {
+		constructorCheckpoint(ctx, c, cfg, model, name, "genesis", head, 0)
+	}
 	unauthenticatedRefused(ctx)
 	roots := []common.Hash{}
 	hashes := []common.Hash{}
@@ -150,14 +164,32 @@ func exercise(ctx context.Context, name, root string) {
 			must(c.CallContext(ctx, &restored, "eth_getBlockByNumber", "latest", false))
 			check(restored != nil && restored.Hash() == head && restored.Root == predicted, "persisted head after restart differs")
 			checkAccounts(ctx, c, model)
+			if selected {
+				constructorCheckpoint(ctx, c, cfg, model, name, "persisted-restart", head, number)
+			}
 			output("RESTART", map[string]any{"profile": name, "number": number, "blockHash": head, "stateRoot": predicted, "completeStateAccounts": 14})
 		}
 	}
 	check(len(roots) == 8 && txs == 16, "incomplete connected cohort")
-	output("PROFILE", map[string]any{"profile": name, "rules": cfg.EVM, "chainId": cfg.L2ChainID, "sourceRollupSha256": digest(raw), "genesisHash": cfg.L2GenesisHash,
+	if selected {
+		constructorCheckpoint(ctx, c, cfg, model, name, "final", head, 8)
+	}
+	record := map[string]any{"profile": name, "rules": cfg.EVM, "chainId": cfg.L2ChainID, "sourceRollupSha256": digest(raw), "genesisHash": cfg.L2GenesisHash,
 		"genesisStateRoot": g.ToBlock().Root(), "connectedBlocks": 8, "exactPlannedTransactions": 16, "completeStateRoots": roots, "blockHashes": hashes,
 		"completeStateAccountChecks": 126, "receiptChecks": 16, "invalidPayloadRefusals": 8, "persistedHeadRestarts": 1, "unauthenticatedEngineRefusals": 1,
-		"actualCompleteClientExecuted": true, "NoMCanonicalityOrReleaseAcceptance": false})
+		"actualCompleteClientExecuted": true, "NoMCanonicalityOrReleaseAcceptance": false}
+	if selected {
+		selectedRaw, err := json.Marshal(cfg)
+		must(err)
+		record["predeployState"] = cfg.PredeployState
+		record["selectedRollupSha256"] = digest(selectedRaw)
+		record["constructorCheckpoints"] = 3
+		record["anchoredConstructorAccountChecks"] = 12
+		record["constructorStatusSlotReads"] = 3
+		record["constructorGetterChecks"] = 9
+		record["explicitCanonicalBlockHashAnchors"] = true
+	}
+	output("PROFILE", record)
 }
 
 func main() {
@@ -183,4 +215,8 @@ func main() {
 		exercise(ctx, name, root)
 	}
 	fmt.Println("CONNECTED-CLIENT-COMPLETE profiles=4 connectedBlocks=32 exactPlannedTransactions=64 completeStateRoots=32 persistedHeadRestarts=4 invalidPayloadRefusals=32 productionAccepted=false")
+	for _, name := range []string{"supported-isthmus", "l2", "l2-69", "l2-dp"} {
+		exercise(ctx, selectedPrefix+name, root)
+	}
+	fmt.Println("CONSTRUCTOR-CLIENT-COMPLETE profiles=4 connectedBlocks=32 exactPlannedTransactions=64 completeStateRoots=32 persistedHeadRestarts=4 invalidPayloadRefusals=32 checkpoints=12 anchoredConstructorAccounts=48 statusSlotReads=12 getters=36 productionAccepted=false")
 }

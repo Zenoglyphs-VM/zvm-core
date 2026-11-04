@@ -39,14 +39,15 @@ The image is pulled only in hosted CI; local source review does not pull it or
 start Docker. The original complete Go, race and native system-hook lanes remain.
 
 These selected synthetic deposits do not establish NoM authority or finality,
-historical deployment, constructor installation equivalence, economic/wallet/DEX
+historical deployment, real acceptance of constructor-state genesis, economic/wallet/DEX
 flows, signed transaction admission, a second independent client, default-scale
 workloads, operating-system portability, owner acceptance, or a production release.
 Container execution is qualification, not an operator deployment or a change to
 the shipped client-image defaults. Production acceptance remains `NO_GO`.
 
-The Go prefix executes the same seven build, vet, original-file negative,
-normal/race and output-preparation commands through one foreground controller.
+The Go prefix executes the original seven build, vet, original-file negative,
+normal/race and output-preparation commands plus the canonical-constructor
+fixture command through one foreground controller.
 Its 3 GiB budget is enforced with 100 ms disk samples, command/output caps,
 actual exit and stream hashes, and an eight-minute phase deadline. The basis is
 an earlier 2,320,666,624-byte free-space drawdown after output preparation; that
@@ -63,3 +64,31 @@ Karst callers must use `DialEngineForConfig`; RPC errors are returned without
 retrying or downgrading. The selector does not change genesis, payload attributes,
 planned transactions, complete-state or receipt predicates. Node dependency and
 caller adoption remain separate from this Core qualification.
+
+
+The same built driver and single container also execute four explicitly selected
+`source-constructors-v1` genesis profiles. The original four profiles, exact
+transactions, model, receipt/account checks and deadlines remain mandatory.
+The additional cohort imports another 32 blocks and 64 exact planned deposits,
+compares 32 complete roots, and performs four persisted restarts plus the same
+32 invalid-payload and four authentication refusals. Its genesis hash/root must
+match the independent canonical constructor proof from the same source/CI run.
+
+At genesis, the persisted height-four restart and height eight, real RPC calls
+use explicit canonical block-hash anchors. Twelve checkpoints compare 48
+constructor-account nonce/balance/code/storage records, read EntryPoint's status
+slot twelve times and run 36 source-predicted Permit2 domain and EntryPoint
+deposit/nonce getters. The accepted head is checked before and after each group.
+The configuration records its explicit recipe and derived rollup digest while
+retaining the original source-file pin. Both cohorts share the unchanged
+512 MiB data cap, disk floor, image, build and container limits. Sampled resource
+records do not assert an OS-enforced aggregate quota or a transient peak bound.
+
+These controls qualify connected execution of the selected synthetic genesis.
+They do not qualify Node adoption of this Core, real owner acceptance of a new
+epoch/genesis, signed user operations, wallet/economic integration or a release.
+
+At each selected genesis, the actual client must also refuse both eth_call and
+eth_getProof at a deterministic unknown canonical block hash. Eight real RPC
+refusals across four profiles check that the supplied hash is honored; the
+accepted head is rechecked unchanged after each pair.

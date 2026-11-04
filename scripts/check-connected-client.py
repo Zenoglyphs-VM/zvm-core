@@ -46,11 +46,13 @@ def read():
             captured.extend(chunk);sys.stdout.buffer.write(chunk);sys.stdout.buffer.flush()
     except BaseException as error:failures.append(str(error))
 reader=threading.Thread(target=read,daemon=True);reader.start();deadline=time.monotonic()+420
+maximum_sampled_allocated=0;minimum_sampled_free=shutil.disk_usage(root).free
 try:
     while process.poll() is None:
         if failures:raise RuntimeError(failures[0])
         assert time.monotonic()<deadline,'complete-client wall deadline exceeded'
-        assert shutil.disk_usage(root).free>=10<<30,'hosted free-space floor reached'
+        observed_free=shutil.disk_usage(root).free;minimum_sampled_free=min(minimum_sampled_free,observed_free)
+        assert observed_free>=10<<30,'hosted free-space floor reached'
         allocated=0
         for directory,subdirs,names in os.walk(data,followlinks=False):
             for part in subdirs:
@@ -60,13 +62,18 @@ try:
                 assert not __import__('stat').S_ISLNK(entry.st_mode),'unexpected generated-data link'
                 allocated+=entry.st_blocks*512
         assert allocated<=512<<20,'generated client-data allocation cap exceeded'
+        maximum_sampled_allocated=max(maximum_sampled_allocated,allocated)
         time.sleep(.5)
     reader.join(timeout=5);assert not reader.is_alive() and not failures
     assert process.returncode==0,('actual complete-client exit',process.returncode)
     text=bytes(captured).decode()
     assert text.count('CONNECTED-CLIENT-COMPLETE profiles=4 connectedBlocks=32 exactPlannedTransactions=64 completeStateRoots=32 persistedHeadRestarts=4 invalidPayloadRefusals=32 productionAccepted=false')==1
+    assert text.count('CONSTRUCTOR-CLIENT-COMPLETE profiles=4 connectedBlocks=32 exactPlannedTransactions=64 completeStateRoots=32 persistedHeadRestarts=4 invalidPayloadRefusals=32 checkpoints=12 anchoredConstructorAccounts=48 statusSlotReads=12 getters=36 productionAccepted=false')==1
     print('CONNECTED-CLIENT-TRANSPORT '+json.dumps({'actualExit':process.returncode,'complete':True,
         'bytes':len(captured),'sha256':hashlib.sha256(captured).hexdigest(),'network':'none','positiveCohortExecutions':1},sort_keys=True),flush=True)
+    print('CONSTRUCTOR-CLIENT-RESOURCE '+json.dumps({'profileCohorts':2,'profiles':8,'maximumSampledGeneratedDataAllocatedBytes':maximum_sampled_allocated,
+        'generatedDataAllocationCapBytes':512<<20,'minimumSampledFreeBytes':minimum_sampled_free,'minimumFreeBytes':10<<30,
+        'sampleIntervalMilliseconds':500,'OSAggregateDiskQuotaClaimed':False,'containerPositiveExecutions':1,'driverBuilds':1,'historicalOrLocalDataDeleted':False},sort_keys=True),flush=True)
 finally:
     if process.poll() is None:
         subprocess.run(['docker','kill',name],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=20)
