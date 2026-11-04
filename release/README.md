@@ -362,11 +362,23 @@ JSON consumers. Only known predeploy accounts are described; the complete state
 root remains the commitment to the entire signed allocation.
 
 This field is emitted after all existing verification predicates succeed. A
-second bounded read verifies the original signed genesis byte pin before the
-description is constructed. It does not change manifest or signing schema one,
+second bounded read verifies both original signed genesis and rollup byte pins
+before the description is constructed. It does not change manifest or signing schema one,
 genesis construction, chain configuration or the installed accounts. Failed
 verification returns an empty receipt. The explicit installation label is
 `supported-genesis-allocation`, and `constructorExecutionObserved` is false.
 Preinstalled runtime code is not evidence that its constructor ran. Connecting
 these account states to a reviewed constructor or historical installation recipe
 and accepting a real release remain separate requirements.
+
+
+An explicit rollup `predeployState: "source-constructors-v1"` selects a separate
+constructor-derived genesis recipe for canonical Permit2 and EntryPoint v0.7
+installation. Omission retains every shipped genesis byte and hash. The selector
+is part of the signed rollup bytes and the resulting genesis must match both
+the signed epoch and the supported builder. This is a new genesis choice, not
+an in-place migration or activation instruction. No shipped config is changed.
+The optional `genesisAllocation.predeployState` reports that exact selection;
+the original label and `constructorExecutionObserved: false` remain. Independent
+hosted constructor execution is separate evidence and grants no signing or
+owner authority. See [the source recipe and proof boundaries](../tools/predeploy-installation-fixtures/README.md).

@@ -19,6 +19,7 @@ type GenesisAllocation struct {
 	BlockHash                    string             `json:"blockHash"`
 	StateRoot                    string             `json:"stateRoot"`
 	Installation                 string             `json:"installation"`
+	PredeployState               string             `json:"predeployState,omitempty"`
 	ConstructorExecutionObserved bool               `json:"constructorExecutionObserved"`
 	Predeploys                   []GenesisPredeploy `json:"predeploys"`
 }
@@ -47,13 +48,19 @@ func (m Manifest) genesisAllocation(directory string) (GenesisAllocation, error)
 		return result, errors.New("genesis allocation root could not be opened")
 	}
 	defer root.Close()
-	var raw []byte
+	var raw, rollupRaw []byte
 	for _, pin := range m.Files {
-		if pin.Kind == "l2-genesis" {
+		switch pin.Kind {
+		case "l2-genesis":
 			raw, err = readPin(root, pin, 16<<20)
-			break
+		case "rollup":
+			rollupRaw, err = readPin(root, pin, MaxDocumentBytes)
+		}
+		if err != nil {
+			return result, err
 		}
 	}
+	cfg, err := m.BindConfiguration(rollupRaw)
 	if err != nil {
 		return result, err
 	}
@@ -97,5 +104,6 @@ func (m Manifest) genesisAllocation(directory string) (GenesisAllocation, error)
 			RuntimeCodeHash: crypto.Keccak256Hash(account.Code).Hex(), Storage: storage})
 	}
 	return GenesisAllocation{BlockHash: blockHash.Hex(), StateRoot: g.ToBlock().Root().Hex(),
-		Installation: "supported-genesis-allocation", ConstructorExecutionObserved: false, Predeploys: accounts}, nil
+		PredeployState: string(cfg.PredeployState),
+		Installation:   "supported-genesis-allocation", ConstructorExecutionObserved: false, Predeploys: accounts}, nil
 }

@@ -6,15 +6,7 @@ BUDGET=3<<30
 STDOUT_CAP=4<<20
 STDERR_CAP=512<<10
 PHASE_OUTPUT_CAP=8<<20
-STEPS=[
- (['go','build','-p=2','./...'],{}),
- (['go','vet','-p=2','./...'],{}),
- (['python3','-B','scripts/check-genesis-json-original.py'],{}),
- (['go','test','-p=2','-json','-count=1','./...'],{}),
- (['go','test','-p=2','-race','-json','-count=1','-timeout=5m','./release/...'],{}),
- (['go','run','./tools/system-predeploy-fixtures','$RUNNER_TEMP/system-predeploy-input.json'],{}),
- (['go','build','-p=2','-trimpath','-o','$RUNNER_TEMP/connected-client-check','./tools/connected-client-check'],{'CGO_ENABLED':'0'}),
-]
+STEPS=[(['go', 'build', '-p=2', './...'], {}), (['go', 'vet', '-p=2', './...'], {}), (['python3', '-B', 'scripts/check-genesis-json-original.py'], {}), (['go', 'test', '-p=2', '-json', '-count=1', './...'], {}), (['go', 'test', '-p=2', '-race', '-json', '-count=1', '-timeout=5m', './release/...'], {}), (['go', 'run', './tools/system-predeploy-fixtures', '$RUNNER_TEMP/system-predeploy-input.json'], {}), (['go', 'build', '-p=2', '-trimpath', '-o', '$RUNNER_TEMP/connected-client-check', './tools/connected-client-check'], {'CGO_ENABLED': '0'}), (['go', 'run', './tools/predeploy-installation-fixtures', '$RUNNER_TEMP/predeploy-installation-input.json'], {})]
 
 def capacity(baseline):
     free=shutil.disk_usage(os.environ['RUNNER_TEMP']).free

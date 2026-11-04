@@ -48,6 +48,8 @@ jobs:
         run: cargo +1.95.0 build --release --locked --jobs 2 --manifest-path tools/system-predeploy-check/Cargo.toml
       - name: Execute all four native system-call profiles and deliberate refusal controls
         run: python3 -B scripts/check-system-predeploys.py --input "$RUNNER_TEMP/system-predeploy-input.json" --binary "$RUNNER_TEMP/system-predeploy-target/release/zvm-system-predeploy-check"
+      - name: Check canonical constructor-state recipes under all supported OP rules
+        run: python3 -B scripts/check-predeploy-installation.py --input "$RUNNER_TEMP/predeploy-installation-input.json" --binary "$RUNNER_TEMP/system-predeploy-target/release/predeploy-installation"
       - name: Qualify four connected profiles through the pinned complete OP client
         run: python3 -B scripts/check-connected-client.py "$RUNNER_TEMP/connected-client-check"
       - name: Verify controlled source restoration

@@ -194,6 +194,10 @@ type Config struct {
 	// "karst" (Osaka, Jovian's minimum base fee — op-reth only). Empty means
 	// isthmus, which is every chain written before the name existed.
 	EVM string `json:"evm,omitempty"`
+
+	// PredeployState selects a separately accepted genesis-state recipe.
+	// Omitted keeps every existing preinstallation byte and nonce unchanged.
+	PredeployState PredeployState `json:"predeployState,omitempty"`
 	// MinBaseFee is Jovian's floor under EIP-1559's base fee, in wei. Only
 	// meaningful on karst; zero leaves the base fee to decay as before.
 	MinBaseFee uint64 `json:"minBaseFee,omitempty"`
@@ -433,6 +437,9 @@ func parse(raw []byte, label string) (*Config, error) {
 // of these would derive a different chain from its peers at the fork height,
 // which is the one failure this check exists to prevent.
 func (c *Config) CheckForks() error {
+	if err := c.PredeployState.Validate(); err != nil {
+		return err
+	}
 	switch c.EVM {
 	case "", EVMIsthmus, EVMKarst:
 	default:
