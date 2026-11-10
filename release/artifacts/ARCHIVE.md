@@ -76,3 +76,13 @@ inputs; a second build or another host's reproduction is separate evidence.
 Original D02 still requires qualified supported-platform project outputs,
 actual signed project sidecars, complete chosen inventories, independent
 download/reproduction and owner/operator/epoch publication acceptance.
+
+## Relayer qualification record
+
+The [darwin/arm64 Relayer archive record](qualification/relayer-archive-darwin-arm64.json)
+uses the manifest, policy, executable and SPDX bytes from the
+[parent-source contents qualification](qualification/relayer-parent-contents-darwin-arm64.json).
+The second producer stream matched the retained archive byte for byte. The Go
+consumer checked the canonical layout, a separate ZIP reader verified all seven
+entries, and an incorrect archive digest was refused. The archive receipt keeps
+release acceptance separate from these checks.

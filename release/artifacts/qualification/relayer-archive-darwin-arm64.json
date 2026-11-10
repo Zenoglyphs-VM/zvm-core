@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "scope": "Local qualification of the canonical archive for the retained darwin/arm64 Relayer subject.",
+  "relayerCommit": "5a72a223dd60d1ae4e974d420cadd85e6f9ee929",
+  "coreCommit": "29e6d9b30be94de3772c850c7a1e9811585a8833",
+  "qualificationContext": "synthetic local release envelope",
+  "subject": {
+    "bytes": 28329794,
+    "sha256": "7ba0379cbb14fd1b4cb88d1bbb2e82350a4c634a80b57436c9668bc3dc247e72"
+  },
+  "spdx": {
+    "bytes": 88730,
+    "sha256": "90107c709d0fafc45ad237c8f3ab7ceada290cbf37d9dc435b060383525c9a0f"
+  },
+  "archivePolicy": {
+    "format": "zip-store-v1",
+    "manifestSha256": "678a8e9ea74d161553a40f4e823a1d0873cb03813a9067bd98c509dc7e517e9c",
+    "schema": 1,
+    "selectionPolicySha256": "21a58fa4074346f0d27221019bc36740541f94cd479079f24e2a5d092c380769",
+    "sourceDateEpoch": 1767225600
+  },
+  "archive": {
+    "bytes": 28424613,
+    "sha256": "fb8f4e1775981530b9d816d39b984fe7a3c78cfcd82602ef6d9e8e23b499a378"
+  },
+  "exactExistingParentContentsManifestMatched": true,
+  "streamedProductions": 2,
+  "secondArchiveFileWritten": false,
+  "producerStreamsByteIdentical": true,
+  "independentZipEntriesVerified": 7,
+  "incorrectArchiveDigestRefused": true,
+  "goArchiveReceipt": {
+    "archiveBytes": 28424613,
+    "archivePolicySha256": "278e8816ab9710fb65b20903e4a2175bf029cbb2f0f4156760aa90fe947e3fbc",
+    "archiveSelectionVerified": true,
+    "archiveSha256": "fb8f4e1775981530b9d816d39b984fe7a3c78cfcd82602ef6d9e8e23b499a378",
+    "deterministicMetadataVerified": true,
+    "filesVerified": 5,
+    "manifestSha256": "678a8e9ea74d161553a40f4e823a1d0873cb03813a9067bd98c509dc7e517e9c",
+    "policySha256": "21a58fa4074346f0d27221019bc36740541f94cd479079f24e2a5d092c380769",
+    "provenanceSignaturesVerified": false,
+    "releaseAccepted": false,
+    "sbomContentsVerified": false
+  },
+  "packerSha256": "6a6f3cb9502650d07df0e670144122c278091485b3bc90bba14f020a90c2efea",
+  "checkedPackerSourceFiles": {
+    "cmd/zvm-artifact-pack/main.go": "fd77e51b9054d7a6c5e0c98b3636e67b8d1b500fd7fe7a1cbed3199e02bc02b4",
+    "release/artifacts/archive.go": "fc1cdd37656792142375c67ce2248a05bba84573965b634c4162da17afcaccdf"
+  },
+  "nativeBuildsDuringPackaging": 0,
+  "serviceExecutions": 0
+}
