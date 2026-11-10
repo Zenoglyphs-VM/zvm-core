@@ -45,26 +45,32 @@ func (m Manifest) BindConfiguration(raw []byte) (*rollup.Config, error) {
 }
 
 func (m Manifest) NewAssertion(p Policy, s Signatures, k TrustedKeys, configuration []byte) (Assertion, error) {
+	_, a, err := m.bindAssertion(p, s, k, configuration)
+	return a, err
+}
+
+func (m Manifest) bindAssertion(p Policy, s Signatures, k TrustedKeys, configuration []byte) (*rollup.Config, Assertion, error) {
 	var a Assertion
 	if _, err := m.VerifySignatures(p, s, k); err != nil {
-		return a, err
+		return nil, a, err
 	}
-	if _, err := m.BindConfiguration(configuration); err != nil {
-		return a, err
+	cfg, err := m.BindConfiguration(configuration)
+	if err != nil {
+		return nil, a, err
 	}
 	message, err := m.SigningMessage()
 	if err != nil {
-		return a, err
+		return nil, a, err
 	}
 	manifest, err := m.Fingerprint()
 	if err != nil {
-		return a, err
+		return nil, a, err
 	}
 	epoch, err := m.EpochFingerprint()
 	if err != nil {
-		return a, err
+		return nil, a, err
 	}
-	return Assertion{Schema: Schema, SigningMessage: base64.StdEncoding.EncodeToString(message), Signatures: Signatures{Schema: s.Schema, Signatures: slices.Clone(s.Signatures)}, ManifestSHA256: manifest, EpochSHA256: epoch, RuntimeObserved: false}, nil
+	return cfg, Assertion{Schema: Schema, SigningMessage: base64.StdEncoding.EncodeToString(message), Signatures: Signatures{Schema: s.Schema, Signatures: slices.Clone(s.Signatures)}, ManifestSHA256: manifest, EpochSHA256: epoch, RuntimeObserved: false}, nil
 }
 
 func DecodeAssertionInputs(manifest, policy, signatures, keys, configuration []byte) (Assertion, error) {

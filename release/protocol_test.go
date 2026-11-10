@@ -70,7 +70,7 @@ func acceptedProtocol(t *testing.T, f *fixture, configuration, protocol []byte) 
 
 func TestProtocolGuardSupportedAndUnsupportedActivationBoundaries(t *testing.T) {
 	f, configuration, policy := protocolFixture(t)
-	policy.Requirements = append(policy.Requirements, ProtocolRequirement{"wire", 2, 400}, ProtocolRequirement{"future-rule", 1, 400})
+	policy.Requirements = append(policy.Requirements, ProtocolRequirement{"later-rule", 1, 450}, ProtocolRequirement{"wire", 2, 400}, ProtocolRequirement{"future-rule", 1, 400})
 	raw := protocolJSON(t, policy)
 	pinProtocol(t, f, raw)
 	cfg, a, guard, err := acceptedProtocol(t, f, configuration, raw)
@@ -82,14 +82,14 @@ func TestProtocolGuardSupportedAndUnsupportedActivationBoundaries(t *testing.T) 
 			t.Fatalf("supported momentum %d refused: %v", height, err)
 		}
 	}
-	for _, height := range []uint64{400, 401, math.MaxUint64} {
+	for _, height := range []uint64{400, 401, 449, 450, 451, math.MaxUint64} {
 		var halt *ProtocolHalt
 		if err := guard.Check(cfg, height); !errors.As(err, &halt) || halt.Requirement.Rule != "future-rule" || halt.Requirement.Momentum != 400 {
 			t.Fatalf("wrong deterministic stop at %d: %v", height, err)
 		}
 	}
 	snapshot := guard.Snapshot()
-	if !snapshot.Enforced || snapshot.PolicySHA256 != digest(raw) || snapshot.EpochID != policy.EpochID || len(snapshot.Capabilities) != 7 {
+	if !snapshot.Enforced || snapshot.PolicySHA256 != digest(raw) || snapshot.EpochID != policy.EpochID || len(snapshot.Capabilities) != 7 || len(snapshot.Requirements) != len(policy.Requirements) {
 		t.Fatal("incomplete protocol snapshot")
 	}
 	snapshot.Requirements[0].Momentum = 1
@@ -242,5 +242,55 @@ func TestProtocolPolicyReaderUsesItsSmallerRegularFileLimit(t *testing.T) {
 	}
 	if _, err := ReadProtocolPolicyDocument(link); err == nil {
 		t.Fatal("linked input accepted")
+	}
+}
+
+func TestProtocolStartupBindsUniqueRollupSnapshot(t *testing.T) {
+	f, original, policy := protocolFixture(t)
+	index := slices.IndexFunc(f.manifest.Files, func(file File) bool { return file.Kind == "rollup" })
+	if index < 0 {
+		t.Fatal("missing rollup fixture pin")
+	}
+	const chain = `"l2ChainId":`
+	const fee = `"fromHeight":`
+	for _, tc := range []struct {
+		name, field, replacement string
+		accepted                 bool
+	}{
+		{"unique snapshot", chain, `"L2ChainId":`, true},
+		{"repeated chain field", chain, `"\u006c2ChainId":1,"l2ChainId":`, false},
+		{"repeated custom fee field", fee, `"FromHeight":0,"fromHeight":`, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if bytes.Count(original, []byte(tc.field)) != 1 {
+				t.Fatal("expected one original rollup field")
+			}
+			configuration := bytes.Replace(original, []byte(tc.field), []byte(tc.replacement), 1)
+			pin := &f.manifest.Files[index]
+			pin.Bytes, pin.SHA256 = int64(len(configuration)), digest(configuration)
+			f.manifest.Epoch.RollupSHA256 = pin.SHA256
+			policy.RollupSHA256 = pin.SHA256
+			raw := protocolJSON(t, policy)
+			pinProtocol(t, f, raw)
+			cfg, assertion, guard, err := acceptedProtocol(t, f, configuration, raw)
+			if !tc.accepted {
+				if cfg != nil || assertion != nil || guard != nil || err == nil ||
+					err.Error() != "pinned rollup configuration is invalid" {
+					t.Fatalf("startup did not refuse the repeated field after signature and digest checks: %v", err)
+				}
+				return
+			}
+			if err != nil || cfg == nil || assertion == nil || guard == nil {
+				t.Fatalf("startup did not return the accepted snapshot: %v", err)
+			}
+			snapshot := guard.Snapshot()
+			if !snapshot.Enforced || snapshot.EpochID != policy.EpochID || snapshot.PolicySHA256 != digest(raw) ||
+				assertion.ManifestSHA256 == "" || assertion.EpochSHA256 == "" || assertion.RuntimeObserved {
+				t.Fatal("startup objects disagree with the signed fixture")
+			}
+			if err := guard.Check(cfg, cfg.L1StartHeight); err != nil {
+				t.Fatalf("guard did not accept the startup configuration: %v", err)
+			}
+		})
 	}
 }

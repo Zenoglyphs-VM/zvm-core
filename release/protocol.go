@@ -62,7 +62,7 @@ type ProtocolGuard struct {
 	policy              ProtocolActivationPolicy
 	policySHA256        string
 	configurationSHA256 string
-	unsupported         []ProtocolRequirement
+	firstUnsupported    ProtocolRequirement
 }
 
 func (g *ProtocolGuard) Snapshot() ProtocolSnapshot {
@@ -84,10 +84,8 @@ func (g *ProtocolGuard) Check(cfg *rollup.Config, momentum uint64) error {
 	if err != nil || digest(raw) != g.configurationSHA256 {
 		return errors.New("accepted protocol configuration changed; derivation is stopped")
 	}
-	for _, requirement := range g.unsupported {
-		if momentum >= requirement.Momentum {
-			return &ProtocolHalt{Requirement: requirement}
-		}
+	if requirement := g.firstUnsupported; requirement.Momentum != 0 && momentum >= requirement.Momentum {
+		return &ProtocolHalt{Requirement: requirement}
 	}
 	return nil
 }
@@ -147,6 +145,7 @@ func configuredProtocolRules(cfg *rollup.Config) map[string]uint64 {
 		rules["native-fee"] = cfg.Fee.FromHeight
 	}
 	if len(cfg.FeeMarkets) != 0 {
+		// Later schedule entries change parameters within the same rule version.
 		rules["fee-market"] = cfg.FeeMarkets[0].Momentum
 	}
 	return rules
@@ -195,21 +194,22 @@ func newProtocolGuard(m Manifest, cfg *rollup.Config, raw []byte) (*ProtocolGuar
 	for _, c := range CompiledProtocolCapabilities() {
 		capabilities[c.Rule] = c.Version
 	}
-	var unsupported []ProtocolRequirement
+	// The decoded requirements are ordered by momentum and then rule name.
+	var firstUnsupported ProtocolRequirement
 	for _, r := range p.Requirements {
 		if capabilities[r.Rule] >= r.Version {
 			if configured[r.Rule] == 0 {
 				return nil, errors.New("protocol policy activates an implemented rule absent from configuration")
 			}
-		} else {
-			unsupported = append(unsupported, r)
+		} else if firstUnsupported.Momentum == 0 {
+			firstUnsupported = r
 		}
 	}
 	configuration, err := json.Marshal(cfg)
 	if err != nil {
 		return nil, errors.New("protocol configuration could not be retained")
 	}
-	return &ProtocolGuard{policy: p, policySHA256: digest(raw), configurationSHA256: digest(configuration), unsupported: unsupported}, nil
+	return &ProtocolGuard{policy: p, policySHA256: digest(raw), configurationSHA256: digest(configuration), firstUnsupported: firstUnsupported}, nil
 }
 
 // DecodeProtocolConfiguration verifies independent inventory/quorum inputs and
@@ -232,11 +232,7 @@ func DecodeProtocolConfiguration(manifest, policy, signatures, keys, configurati
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	a, err := m.NewAssertion(p, s, k, configuration)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	cfg, err := m.BindConfiguration(configuration)
+	cfg, a, err := m.bindAssertion(p, s, k, configuration)
 	if err != nil {
 		return nil, nil, nil, err
 	}

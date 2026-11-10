@@ -161,6 +161,67 @@ func TestSignedOfflineReleaseBindsFilesSourcesAndEpochWithoutClaimingRuntime(t *
 	}
 }
 
+func TestSignedReleaseRollupFieldUniqueness(t *testing.T) {
+	f := newFixture(t)
+	index := slices.IndexFunc(f.manifest.Files, func(file File) bool { return file.Kind == "rollup" })
+	if index < 0 {
+		t.Fatal("missing rollup fixture pin")
+	}
+	pin := &f.manifest.Files[index]
+	path := filepath.Join(f.files, pin.Repository, pin.Path)
+	original, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	const chain = `"l2ChainId":`
+	const fee = `"fromHeight":`
+	for _, tc := range []struct {
+		name, field, replacement string
+		accepted                 bool
+	}{
+		{"unique re-pinned bytes", chain, `"L2ChainId":`, true},
+		{"repeated root field", chain, `"l2ChainId":1,"l2ChainId":`, false},
+		{"escaped repeated root field", chain, `"\u006c2ChainId":1,"l2ChainId":`, false},
+		{"repeated custom fee field", fee, `"FromHeight":0,"fromHeight":`, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if bytes.Count(original, []byte(tc.field)) != 1 {
+				t.Fatal("expected one fixture field before replacement")
+			}
+			raw := bytes.Replace(original, []byte(tc.field), []byte(tc.replacement), 1)
+			pin.Bytes, pin.SHA256 = int64(len(raw)), digest(raw)
+			f.manifest.Epoch.RollupSHA256 = pin.SHA256
+			if err := os.WriteFile(path, raw, 0600); err != nil {
+				t.Fatal(err)
+			}
+			signatures := f.signatures(t)
+			receipt, verifyErr := f.manifest.Verify(context.Background(), f.policy, signatures, f.keys, f.files, f.sources)
+			assertion, assertionErr := f.manifest.NewAssertion(f.policy, signatures, f.keys, raw)
+			if tc.accepted {
+				if verifyErr != nil || assertionErr != nil {
+					t.Fatalf("unique configuration was refused: verify %v, assertion %v", verifyErr, assertionErr)
+				}
+				if receipt.TrustedSignatures != 2 || receipt.VerifiedFiles != len(f.manifest.Files) ||
+					receipt.ManifestSHA256 == "" || receipt.ManifestSHA256 != assertion.ManifestSHA256 ||
+					receipt.EpochSHA256 == "" || receipt.EpochSHA256 != assertion.EpochSHA256 ||
+					receipt.RuntimeObserved || assertion.RuntimeObserved {
+					t.Fatal("offline receipt and assertion disagree")
+				}
+				return
+			}
+			// These errors are reached only after signature and digest checks.
+			const invalid = "pinned rollup configuration is invalid"
+			if verifyErr == nil || verifyErr.Error() != invalid || receipt != (Receipt{}) {
+				t.Fatalf("offline verification did not refuse the configuration: %v", verifyErr)
+			}
+			if assertionErr == nil || assertionErr.Error() != invalid || assertion.Schema != 0 ||
+				assertion.SigningMessage != "" {
+				t.Fatalf("service assertion did not refuse the configuration: %v", assertionErr)
+			}
+		})
+	}
+}
+
 func TestIndependentPolicyRejectsMissingAndUnexpectedInventory(t *testing.T) {
 	f := newFixture(t)
 	for _, name := range []string{"repositories", "toolchains", "images", "compilers", "files", "contracts"} {
