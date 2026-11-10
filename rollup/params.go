@@ -3,12 +3,15 @@
 package rollup
 
 import (
+	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math"
 	"math/big"
 	"os"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 
@@ -376,13 +379,67 @@ func (c *Config) MomentumForL2Block(number uint64) uint64 {
 	return c.L1StartHeight + number - 1
 }
 
+// decodeConfigJSON accepts one complete value with unique, known struct fields.
+// Custom decoders must use it too: DisallowUnknownFields does not inspect the
+// object consumed by a nested UnmarshalJSON method.
+func decodeConfigJSON(raw []byte, out any) error {
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(out); err != nil {
+		return err
+	}
+	if _, err := decoder.Token(); err != io.EOF {
+		if err != nil {
+			return fmt.Errorf("trailing configuration data: %w", err)
+		}
+		return fmt.Errorf("trailing configuration value")
+	}
+	keys := json.NewDecoder(bytes.NewReader(raw))
+	keys.UseNumber()
+	return checkConfigFields(keys)
+}
+
+// checkConfigFields walks one already type-checked value. Track names separately
+// in each object and use the same case folding as the struct decoder.
+func checkConfigFields(decoder *json.Decoder) error {
+	token, err := decoder.Token()
+	if err != nil {
+		return err
+	}
+	delim, ok := token.(json.Delim)
+	if !ok {
+		return nil
+	}
+	var names []string
+	for decoder.More() {
+		if delim == '{' {
+			key, err := decoder.Token()
+			if err != nil {
+				return err
+			}
+			name := key.(string)
+			for _, previous := range names {
+				if strings.EqualFold(previous, name) {
+					return fmt.Errorf("duplicate configuration field %q", name)
+				}
+			}
+			names = append(names, name)
+		}
+		if err := checkConfigFields(decoder); err != nil {
+			return err
+		}
+	}
+	_, err = decoder.Token()
+	return err
+}
+
 func Load(path string) (*Config, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 	var c Config
-	if err := json.Unmarshal(raw, &c); err != nil {
+	if err := decodeConfigJSON(raw, &c); err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
 	if c.L1StartHeight == 0 || c.GasLimit == 0 || c.L2ChainID == 0 {
