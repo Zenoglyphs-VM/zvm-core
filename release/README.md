@@ -102,6 +102,11 @@ Image references, declared platform/version labels, running binary/image identit
 L1 genesis calculation, independent node agreement and production behavior require
 separate qualification. A valid offline receipt cannot turn those gates green.
 
+The offline verifier and service assertion producer use the same rollup
+configuration rules as the file loader. Repeated members are refused even
+when the file digest and signature quorum match. This includes members
+with equal values and names that match after JSON unescaping or case folding.
+
 Tests use synthetic tool/image labels, ephemeral signing keys and throwaway Git
 repositories. The shipped L2 configuration/genesis supply the actual supported
 construction fixture. No wallet, container or live chain is started.
