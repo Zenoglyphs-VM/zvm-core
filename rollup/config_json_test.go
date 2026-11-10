@@ -85,3 +85,54 @@ func TestFeeCustomDecoderIsStrictAndPreservesReceiverOnFailure(t *testing.T) {
 		t.Fatal("failed fee validation changed the receiver")
 	}
 }
+
+func TestLoadRejectsDuplicateConfigurationFields(t *testing.T) {
+	const required = `"l1StartHeight":2,"l2ChainId":7340470,"gasLimit":300000000`
+	for _, fixture := range []struct {
+		name, extra string
+	}{
+		{"same root key", `"gasLimit":300000000`},
+		{"root case alias", `"GASLIMIT":200000000`},
+		{"escaped key", `"\u0067asLimit":200000000`},
+		{"unicode case alias", `"ga\u017fLimit":200000000`},
+		{"repeated object", `"forks":{"gas":0},"forks":{"wire":0}`},
+		{"fork", `"forks":{"gas":0,"gas":0}`},
+		{"fee", `"fee":{"fromHeight":0,"FROMHEIGHT":0}`},
+		{"bridge fee", `"bridgeFee":{"bps":10,"bps":20}`},
+		{"fee market", `"feeMarket":[{"momentum":100,"denominator":8,"denominator":9,"elasticity":2}]`},
+	} {
+		t.Run(fixture.name, func(t *testing.T) {
+			cfg, err := loadJSONFixture(t, "{"+required+","+fixture.extra+"}")
+			if cfg != nil || err == nil || !strings.Contains(err.Error(), "duplicate configuration field") {
+				t.Fatalf("expected duplicate field refusal, got %v", err)
+			}
+		})
+	}
+}
+
+func TestLoadAllowsUniqueFieldsAcrossFeeMarketEntries(t *testing.T) {
+	cfg, err := loadJSONFixture(t, `{
+        "L1StartHeight":2,"l2ChainId":7340470,"gasLimit":300000000,"fee":null,
+        "feeMarket":[{"momentum":100,"denominator":8,"elasticity":2},
+                     {"momentum":200,"denominator":9,"elasticity":2}]
+    }`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.L1StartHeight != 2 || cfg.Fee != nil || len(cfg.FeeMarkets) != 2 ||
+		cfg.FeeMarkets[0].Denominator != 8 || cfg.FeeMarkets[1].Denominator != 9 {
+		t.Fatal("unique legacy spelling, optional fee, or market entries changed")
+	}
+}
+
+func TestFeeCustomDecoderRejectsDuplicateFields(t *testing.T) {
+	f := MainnetSupplyAnchor
+	before := f
+	err := json.Unmarshal([]byte(`{"fromHeight":0,"FromHeight":0}`), &f)
+	if err == nil || !strings.Contains(err.Error(), "duplicate configuration field") {
+		t.Fatalf("expected duplicate field refusal, got %v", err)
+	}
+	if f != before {
+		t.Fatal("failed decode changed the fee receiver")
+	}
+}
