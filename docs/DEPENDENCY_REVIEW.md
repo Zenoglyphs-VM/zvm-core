@@ -80,7 +80,9 @@ and [Dependabot options](https://docs.github.com/en/code-security/reference/supp
 The `Dependency review` workflow runs the pinned govulncheck v1.9.0 source
 scanner against the exact selected commit, including test packages. The scanner
 is built with Go 1.27.4 in a separate tool module/cache, then analysis uses
-Go 1.26.11. The scanned source is this workflow's exact checkout; its findings
+Go 1.26.11 with CGO disabled. The source scan includes this module's test
+packages; other platforms, build tags and CGO configurations need separate
+review. The scanned source is this workflow's exact checkout; its findings
 are not an analysis of historical retained binaries. The selected SDK does not
 choose an accepted release toolchain or qualify other platforms. The Go job
 uses the same exact SDK, verifies module checksums and tidy locks, and runs
@@ -160,9 +162,13 @@ The candidate locks select these fixes from the public Go advisory reports:
 | brotli | 1.2.4 | 1.2.7 | [GO-2026-6888](https://pkg.go.dev/vuln/GO-2026-6888) |
 | gorilla/websocket | 1.4.2 | 1.5.3 | [GO-2026-6278](https://pkg.go.dev/vuln/GO-2026-6278), an unreviewed database report; upstream's mask-key change was also inspected |
 | klauspost/compress | 1.17.8 | 1.20.2 | [GO-2026-6865](https://pkg.go.dev/vuln/GO-2026-6865) and [GO-2026-5841](https://pkg.go.dev/vuln/GO-2026-5841) |
-| OpenTelemetry root, metric and trace | 1.40.0 | 1.41.0 | [GO-2026-5506](https://pkg.go.dev/vuln/GO-2026-5506) |
+| OpenTelemetry root, metric and trace | 1.40.0 | 1.44.0 | [GO-2026-5506](https://pkg.go.dev/vuln/GO-2026-5506) and [GO-2026-5158](https://pkg.go.dev/vuln/GO-2026-5158) |
 | x/crypto | 0.44.0 | 0.59.0 | Includes the reported [GO-2026-5932](https://pkg.go.dev/vuln/GO-2026-5932) fix and earlier matched fixes |
 | x/text | 0.31.0 | 0.44.0 | [GO-2026-5970](https://pkg.go.dev/vuln/GO-2026-5970) and [GO-2026-6629](https://pkg.go.dev/vuln/GO-2026-6629) |
+
+OpenTelemetry 1.44.0 also avoids the baggage-length regression ranges in
+GO-2026-5158. The scanner continues to review the complete selected module
+configuration; passing an earlier advisory's fixed version is not enough.
 
 The op-geth replacement stays at v1.101702.2. Engine HTTP authentication now
 uses the existing JWT library directly instead of importing op-geth's node
