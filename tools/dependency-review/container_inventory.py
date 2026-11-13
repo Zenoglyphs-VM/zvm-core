@@ -60,7 +60,7 @@ def main():
                 not {"ca-certificates-20261020-r0", "wget-1.25.0-r1"} <= set(packages) or
                 any(not re.fullmatch(r"[A-Za-z0-9_.+~-]+", item) for item in packages)):
             raise ReviewError("unexpected installed package inventory")
-        digest = run("binary", common + ["--entrypoint=/bin/sha256sum", image["id"], "/usr/local/bin/zvm"]).decode().split()
+        digest = run("binary", common + ["--entrypoint=/bin/busybox", image["id"], "sha256sum", "/usr/local/bin/zvm"]).decode().split()
         if len(digest) != 2 or not re.fullmatch(r"[0-9a-f]{64}", digest[0]) or digest[1] != "/usr/local/bin/zvm":
             raise ReviewError("invalid CLI binary digest")
         phase = "source_after"

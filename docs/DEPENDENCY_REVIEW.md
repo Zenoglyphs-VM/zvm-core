@@ -236,7 +236,7 @@ is required; this patch does not migrate every supported platform.
 
 The container job retains a bounded observation of its exact local image ID,
 OS/architecture, entrypoint/user, installed package versions and CLI binary
-SHA-256. Every observation runs against that immutable local image ID with
+SHA-256. The package and binary commands use that immutable local image ID with
 networking disabled, a read-only filesystem and UID/GID 65534. Actual process
 exits, output completeness and stream digests accompany the record; failures
 are retained. The image configuration query selects only these fields rather
