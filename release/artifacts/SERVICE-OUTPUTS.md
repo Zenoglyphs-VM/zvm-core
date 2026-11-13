@@ -152,3 +152,30 @@ The service, SPDX and archive are not rebuilt, regenerated or distributed by
 this addition. All earlier native, contents, archive and failed-preparation
 observations retain their own scope and receipts. Runtime/license coverage,
 independent reproduction and project signing/release acceptance remain open.
+
+## Retained Node package observation
+
+The [Node package record](qualification/node-package-darwin-arm64.json) adds one
+actual Go 1.25.14 darwin/arm64 executable at the selected public Node/Core commits.
+Its source-side graph has 674 packages, 88 remote modules and one local Core
+module. Source-bound SPDX checks the retained executable, module/lock inputs and
+112 Core files. The explicit contents check also binds all 110 Node files, their
+raw commit control and the exact Core Gitlink; repeat output is identical and
+legacy mode retains its false parent-source result.
+
+The exact Node SPDX bytes separately pass the pinned official SPDX 2.3.1 schema
+with Ajv2019 8.17.1 and six malformed controls. A schema-valid changed subject
+checksum is refused by the actual Go semantic checker while the original passes.
+The retained schema packages, current pinned Node runtime and Go tools are reused.
+Source, schema, semantic and archive checks share one bounded foreground job.
+
+The canonical archive uses that same contents manifest. Two producer streams
+match byte for byte; the Go consumer and a separate ZIP reader check seven
+entries, and an incorrect archive digest is refused. This stage performs no new
+service build. No dependency download, cache-tree copy or service execution is
+needed; the executable, SPDX and archive remain undistributed qualification data.
+
+The context is synthetic. Project signing, accepted recipes/toolchains/images,
+additional supported platforms, runtime/license coverage, independent
+reproduction and owner/operator release acceptance remain open. All five
+original D02 adopters retain their original acceptance requirements.

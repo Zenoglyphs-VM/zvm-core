@@ -100,3 +100,14 @@ command observations. The follow-up runs only the remaining SPDX refusal and
 archive checks. Packaging performs no new service build or execution. The binary
 and archive remain undistributed qualification inputs. Project provenance,
 supported-platform release acceptance and independent reproduction remain open.
+
+## Node qualification record
+
+The [darwin/arm64 Node record](qualification/node-package-darwin-arm64.json)
+reuses one retained executable and its source-bound SPDX. Complete parent/Core
+contents, official schema and subject-checksum semantic controls precede archive
+verification in the same bounded qualification. The archive manifest matches
+the successful contents observation, the repeated producer is byte-identical,
+all seven entries pass an independent reader, and a wrong archive digest fails.
+No second archive file is written. These observations do not authenticate project
+signatures, reproduce the service build independently or accept a release.
