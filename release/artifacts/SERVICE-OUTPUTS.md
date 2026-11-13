@@ -108,3 +108,24 @@ outputs, independent distribution/reproduction and runtime/license coverage
 remain open. Source and package closure does not run the services, signers,
 wallets or a chain. D01/V02/epoch and maintainer/owner/operator release gates
 remain separate. `releaseAccepted` stays false.
+
+## Retained Bridge package observation
+
+The [Bridge package record](qualification/bridge-package-darwin-arm64.json) adds
+one actual Go 1.25.14 darwin/arm64 build at the selected Bridge/Core commits.
+Source-bound SPDX verification checks 89 remote modules and one local Core
+module. Complete contents verification binds all 33 parent files and 112 Core
+files, their raw commit controls and the selected Core Gitlink. The older
+local-source contents mode continues to report no parent-source verification.
+
+The archive layer reuses that exact executable, SPDX and contents manifest;
+it does not rebuild the service. Four parent/SPDX refusals and an independent
+archive-digest refusal complement the positive observations. The initial worker's
+read-only-clone preparation failure and cleanup hold are preserved, with its
+completed commands reused rather than repeated.
+
+This is a local synthetic release context. The service was not executed, and no
+project signature or accepted release was created. The separate receipt fields
+keep parent/source observation, SPDX contents and archive-format verification
+distinct. Linux images, additional supported platforms, runtime/license coverage,
+independent reproduction and maintainer/owner release gates remain open.

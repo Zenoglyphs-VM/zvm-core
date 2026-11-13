@@ -86,3 +86,17 @@ The second producer stream matched the retained archive byte for byte. The Go
 consumer checked the canonical layout, a separate ZIP reader verified all seven
 entries, and an incorrect archive digest was refused. The archive receipt keeps
 release acceptance separate from these checks.
+
+## Bridge qualification record
+
+The [darwin/arm64 Bridge package record](qualification/bridge-package-darwin-arm64.json)
+joins the retained executable and source-bound SPDX with all 33 parent and 112
+Core source files. Its archive uses the exact manifest from that contents check.
+Two producer streams matched byte for byte; the Go consumer and a separate ZIP
+reader checked the seven entries, and an incorrect independent digest was refused.
+
+The record preserves an initial preparation failure and reuses its six complete
+command observations. The follow-up runs only the remaining SPDX refusal and
+archive checks. Packaging performs no new service build or execution. The binary
+and archive remain undistributed qualification inputs. Project provenance,
+supported-platform release acceptance and independent reproduction remain open.
