@@ -18,15 +18,23 @@ jobs:
       GOTELEMETRY: 'off'
       GOFLAGS: '-mod=readonly'
       GOMAXPROCS: '2'
+      GO_DOWNLOAD_BASE_URL: ''
+      REVIEW_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+          allow-unsafe-pr-checkout: false
+      - name: Verify the selected checkout and credential policy
+        run: python3 -B tools/dependency-review/check_checkout.py
 
-      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: '1.26.11'
+          cache-dependency-path: |
+            go.mod
+            go.sum
 
       - name: Verify the selected SDK
         run: |
@@ -47,11 +55,15 @@ jobs:
     timeout-minutes: 15
     env:
       DOCKER_BUILDKIT: '1'
+      REVIEW_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+          allow-unsafe-pr-checkout: false
+      - name: Verify the selected checkout and credential policy
+        run: python3 -B tools/dependency-review/check_checkout.py
       - name: Build the CLI image with the pinned SDK builder
         run: timeout 720s docker build --progress=plain --tag zvm-core:ci .
       - name: Exercise CLI usage without a service or network
@@ -71,3 +83,20 @@ jobs:
               'stderrSha256': hashlib.sha256(done.stderr).hexdigest(),
               'scope': 'CLI usage only; no service, live chain or deployment'}))
           PY
+      - name: Observe the exact local image and installed packages
+        run: |
+          python3 -B tools/dependency-review/container_inventory.py \
+            --source-commit "$REVIEW_SOURCE_COMMIT" \
+            --output "$RUNNER_TEMP/container-input-review"
+      - name: Retain this attempt's image observations, including failures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: container-input-review
+          path: ${{ runner.temp }}/container-input-review/
+          if-no-files-found: error
+          retention-days: 14
+          archive: true
+          overwrite: false
+          include-hidden-files: false
+          compression-level: 6

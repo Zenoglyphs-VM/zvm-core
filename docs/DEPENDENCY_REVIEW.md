@@ -1,7 +1,7 @@
 # Dependency and distribution review
 
 The CI action implementations are pinned to full commit IDs. The adjacent
-version comments describe their existing major versions. Weekly Dependabot
+version comments describe their selected releases. Weekly Dependabot
 configuration proposes updates for Actions, Go modules, Docker inputs and the
 shared web package, with at most two open ordinary version-update pull requests per
 ecosystem. Review and qualification are required before accepting an update.
@@ -191,13 +191,56 @@ a major-version migration. Module/test dependency records and other consumers
 still require their own review. No advisory is suppressed: any finding in the
 current source/test scan continues to fail the review gate. The effective
 op-geth namespace, fork advisory coverage, distribution licenses, supported
-platforms, action/runtime updates and release acceptance remain separate work.
+platforms, continued action/runtime maintenance and release acceptance remain separate work.
 
 The Docker builder selects the official Go 1.26.11 Alpine 3.24 image by its
 full multi-platform index digest and checks the actual SDK version before
 downloading and verifying modules. A separate fifteen-minute CI job builds the
 Linux CLI image and exercises its usage exit with networking disabled. It does
 not start the faucet, contact an engine or publish an image. Other platforms,
-image provenance, the mutable Docker frontend/runtime base and APK repository
-inputs remain separate review and reproducibility work. Weekly Docker update
+image provenance, APK repository inputs and complete transitive package locks
+remain separate review and reproducibility work. Weekly Docker update
 proposals do not establish that any update has been executed or accepted.
+
+## Reviewed action runtime and container inputs
+
+The selected action releases are
+[checkout v7.0.1](https://github.com/actions/checkout/releases/tag/v7.0.1),
+[setup-go v7.0.0](https://github.com/actions/setup-go/releases/tag/v7.0.0) and
+[upload-artifact v7.0.2](https://github.com/actions/upload-artifact/releases/tag/v7.0.2).
+Their full commit pins select Node 24 implementations. Old and new source
+trees, action inputs, bundled code and resolved dependency locks were compared;
+the bundles were not independently rebuilt and upstream action test suites
+were not executed. Actual action execution requires the exact hosted CI attempt.
+Self-hosted runners need their own compatibility and runner-version review.
+
+Each job checks the exact selected source revision and verifies that matching
+repository-local authentication config keys are absent without printing their
+values. Checkout keeps credential persistence disabled and unsafe PR checkout
+disabled. This control does not audit global config or every credential source.
+Setup-go retains explicit SDK versions, automatic switching disabled and the
+ordinary upstream download path. Enabled Go caches explicitly include both
+`go.mod` and `go.sum`; the scanner-build SDK cache remains disabled. Artifact
+uploads explicitly retain ZIP archives, refuse overwrite, exclude hidden files
+and keep the existing fourteen-day retention policy. No additional token
+permissions, privileged trigger, custom download mirror or manual retry is added.
+
+The Dockerfile frontend uses the stable major-1 channel at a full index digest.
+The runtime base selects Alpine 3.22.8 at a full index digest and pins the
+requested ca-certificates and wget package versions. The Go builder's digest
+and exact SDK check remain in place. Registry content digests identify selected
+bytes; they do not independently authenticate image origin or provenance.
+Alpine 3.22's main branch is supported through May 1, 2027 according to the
+[upstream release table](https://alpinelinux.org/releases/). Continued maintenance
+is required; this patch does not migrate every supported platform.
+
+The container job retains a bounded observation of its exact local image ID,
+OS/architecture, entrypoint/user, installed package versions and CLI binary
+SHA-256. Every observation runs against that immutable local image ID with
+networking disabled, a read-only filesystem and UID/GID 65534. Actual process
+exits, output completeness and stream digests accompany the record; failures
+are retained. The image configuration query selects only these fields rather
+than exporting host paths or environment values. This is an installed-package
+observation, not a complete SBOM, image vulnerability scan, license acceptance,
+independent origin proof or release approval. APK repositories, signing keys
+and transitive package selection still require separate review and locking.
