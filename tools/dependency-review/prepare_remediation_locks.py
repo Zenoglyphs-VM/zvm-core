@@ -46,7 +46,7 @@ def main():
         receipt["source"] = before
         raw = file_bytes(Path("tools/dependency-review/remediation-lock-inputs.json"), 8192)
         config = json.loads(raw, object_pairs_hook=unique_object)
-        if config["schema"] != 1 or config["goVersion"] != "go1.26.11" or config["minimumGoVersion"] != "1.26.0":
+        if config["schema"] != 1 or config["goVersion"] != "go1.26.11" or config["minimumGoVersion"] != "1.26.11":
             raise ReviewError("unsupported SDK recipe")
         if (config["goModSha256"], config["goSumSha256"]) != (before["goModSha256"], before["goSumSha256"]):
             raise ReviewError("recipe no longer matches the original module locks")
@@ -85,7 +85,7 @@ def main():
             raise ReviewError("unexpected SDK")
         original = json.loads(run("original-module", ["go", "mod", "edit", "-json"], 65536))
         run("select-sdk", ["go", "mod", "edit", "-go=" + config["minimumGoVersion"],
-                           "-toolchain=" + config["goVersion"]])
+                           "-toolchain=none"])
         run("resolve", ["go", "get"] + [key + "@" + value for key, value in sorted(modules.items())])
         run("tidy", ["go", "mod", "tidy"])
         run("verify", ["go", "mod", "verify"])
@@ -95,7 +95,7 @@ def main():
         if len(inventory) != len(graph) or any(inventory.get(key, {}).get("Version") != value for key, value in modules.items()):
             raise ReviewError("resolved graph differs from exact module selections")
         if (final["Module"] != original["Module"] or final["Replace"] != original["Replace"] or
-                final["Go"] != config["minimumGoVersion"] or final["Toolchain"] != config["goVersion"]):
+                final["Go"] != config["minimumGoVersion"] or final.get("Toolchain", "") not in ("", config["goVersion"])):
             raise ReviewError("module identity, replacement or SDK declaration changed unexpectedly")
         if any(not row.get("Indirect", False) and row["Path"] not in modules and row not in final["Require"]
                for row in original["Require"]):

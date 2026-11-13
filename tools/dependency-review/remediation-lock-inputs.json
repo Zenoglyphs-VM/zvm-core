@@ -2,7 +2,7 @@
   "goModSha256": "ee73727a250f768a34cebce98a678f393906a9a1e98e83b54519cf94d30ca91a",
   "goSumSha256": "7e3f039005118f12158d9cb7714f9c8ffb4cf365c393cf4e2ee030d5ba316d49",
   "goVersion": "go1.26.11",
-  "minimumGoVersion": "1.26.0",
+  "minimumGoVersion": "1.26.11",
   "modules": {
     "github.com/andybalholm/brotli": "v1.2.7",
     "github.com/gorilla/websocket": "v1.5.3",
