@@ -74,3 +74,59 @@ copying those private details into a pull request.
 
 References: [GitHub Actions secure use](https://docs.github.com/en/actions/reference/security/secure-use)
 and [Dependabot options](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference).
+
+## Bounded source vulnerability review
+
+The `Dependency review` workflow runs the pinned govulncheck v1.9.0 source
+scanner against the exact selected commit, including test packages. The scanner
+is built with Go 1.27.4 in a separate tool module/cache, then analysis uses
+Go 1.25.14. The scanned source is this workflow's exact checkout; its findings
+are not an analysis of historical retained binaries. The selected SDK does not
+choose an accepted release toolchain or qualify other platforms. The original
+build/vet/test workflow remains unchanged.
+
+The wrapper checks the complete regular-file Git tree, tracked modes and module
+locks before and after analysis. Gitlinks, links, untracked/ignored files and
+changed inputs require a separately supported profile. A ten-minute process
+deadline, process-group termination on budget refusal, an 8 MiB stdout cap and a
+256 KiB stderr cap bound collection. GOMAXPROCS and GOMEMLIMIT are workload
+controls; GOMEMLIMIT is not an operating-system hard memory limit. The hosted
+job has a separate fifteen-minute deadline. Local protocol tests do not claim
+the hosted process controls or actual scanner execution.
+
+The producer's actual exit, stream completeness, hashes, scanner digest and
+source pins are retained in `execution.json`. `govulncheck.json` and stderr are
+kept even on failure. A valid JSON prefix, an absent report or exit zero alone
+cannot establish success: govulncheck's JSON mode exits zero even when it emits
+findings. A recognized complete protocol, expected scanner/database/Go/mode,
+scan inventory and matching advisory references are required. Incomplete,
+malformed, mismatched, timed-out or capped scans exit 2. Any finding, including
+module-only and package-only reports, exits 1 and requires review. A complete
+scan without findings exits 0 with `NO_FINDINGS_REPORTED_IN_THIS_SCAN`.
+
+`review.json` separates module, package and source-call reports, retains missing
+fix versions as unknown and counts repeated findings separately from distinct
+advisories. The parser also labels binary symbols separately from source call
+traces; this workflow executes source mode only. Source locations and advisory
+prose are omitted from the summary. The raw report remains necessary for call
+site and runtime/build/test classification. Review public artifacts for privacy
+before using these tools on any private source.
+
+A source call reported by static analysis is not exercised exploitability.
+Reflection, unsafe code, excluded build configurations and unknown module
+versions require separate review. An unreported advisory does not establish an
+unaffected dependency. In particular, the effective op-geth replacement needs
+explicit upstream/fork advisory mapping; checking only one namespace is not
+complete fork coverage. Database modification time and retained OSV digests
+identify observations, not an authenticated or complete database snapshot.
+Actual updater operation, remediation, distribution notices and all D04 release
+and owner acceptance requirements remain open. No waivers are generated.
+
+Reports are uploaded for the exact automatic workflow attempt, including failed
+attempts. They are review evidence, not accepted project provenance, a release
+SBOM, a deployment authorization or a clean-security claim. No manual CI
+trigger, retry, signing or release path is added.
+
+Protocol and limits: [govulncheck v1.9.0](https://pkg.go.dev/golang.org/x/vuln/cmd/govulncheck@v1.9.0),
+[stream protocol](https://github.com/golang/vuln/blob/e672cbe8fbc8c76e28fcb6db0efd9ce354e0dac5/internal/govulncheck/govulncheck.go),
+and [Go vulnerability database](https://go.dev/doc/security/vuln/database).
