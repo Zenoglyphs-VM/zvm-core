@@ -11,16 +11,63 @@ permissions:
 jobs:
   go:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
+    env:
+      GOTOOLCHAIN: local
+      GOWORK: 'off'
+      GOTELEMETRY: 'off'
+      GOFLAGS: '-mod=readonly'
+      GOMAXPROCS: '2'
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
 
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
-          go-version-file: go.mod
+          go-version: '1.26.11'
 
+      - name: Verify the selected SDK
+        run: |
+          test "$(go env GOVERSION)" = go1.26.11
+          go version
+          go env GOOS GOARCH GOTOOLCHAIN
+      - name: Verify module integrity and tidy locks
+        run: |
+          go mod verify
+          go mod tidy -diff
       - run: go build ./...
       - run: go vet ./...
       - run: go test ./...
+      - run: go test -race ./...
+
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DOCKER_BUILDKIT: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Build the CLI image with the pinned SDK builder
+        run: timeout 720s docker build --progress=plain --tag zvm-core:ci .
+      - name: Exercise CLI usage without a service or network
+        run: |
+          python3 -B - <<'PY'
+          import hashlib, json, subprocess
+          done = subprocess.run([
+              'docker', 'run', '--rm', '--network=none', '--read-only',
+              '--user=65534:65534', '--cap-drop=ALL',
+              '--security-opt=no-new-privileges', 'zvm-core:ci',
+          ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=20)
+          assert done.returncode == 2 and not done.stdout
+          assert done.stderr.startswith(b'usage: zvm <command> [flags]\n')
+          assert len(done.stderr) <= 65536
+          print(json.dumps({'expectedExit': 2, 'actualExit': done.returncode,
+              'stderrBytes': len(done.stderr),
+              'stderrSha256': hashlib.sha256(done.stderr).hexdigest(),
+              'scope': 'CLI usage only; no service, live chain or deployment'}))
+          PY

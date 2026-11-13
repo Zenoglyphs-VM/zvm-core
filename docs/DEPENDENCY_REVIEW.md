@@ -2,8 +2,8 @@
 
 The CI action implementations are pinned to full commit IDs. The adjacent
 version comments describe their existing major versions. Weekly Dependabot
-configuration proposes updates for Actions, Go modules and the shared web
-package, with at most two open ordinary version-update pull requests per
+configuration proposes updates for Actions, Go modules, Docker inputs and the
+shared web package, with at most two open ordinary version-update pull requests per
 ecosystem. Review and qualification are required before accepting an update.
 
 This configuration does not establish that Dependabot has run, that an advisory
@@ -80,10 +80,12 @@ and [Dependabot options](https://docs.github.com/en/code-security/reference/supp
 The `Dependency review` workflow runs the pinned govulncheck v1.9.0 source
 scanner against the exact selected commit, including test packages. The scanner
 is built with Go 1.27.4 in a separate tool module/cache, then analysis uses
-Go 1.25.14. The scanned source is this workflow's exact checkout; its findings
+Go 1.26.11. The scanned source is this workflow's exact checkout; its findings
 are not an analysis of historical retained binaries. The selected SDK does not
-choose an accepted release toolchain or qualify other platforms. The original
-build/vet/test workflow remains unchanged.
+choose an accepted release toolchain or qualify other platforms. The Go job
+uses the same exact SDK, verifies module checksums and tidy locks, and runs
+build, vet, tests and race tests with automatic toolchain switching disabled.
+Its twenty-minute deadline includes those additional checks.
 
 The wrapper checks the complete regular-file Git tree, tracked modes and module
 locks before and after analysis. Gitlinks, links, untracked/ignored files and
@@ -140,3 +142,56 @@ remain separate records. This normalization applies only to the scan inventory;
 it does not remove findings, collapse their levels or merge advisory revisions.
 An initial complete producer stream that exercised this case remains retained
 under its original source/attempt; consumer replay is separate from a new scan.
+
+## Maintained SDK and dependency remediation
+
+The module requires Go 1.26.11. The minimum includes the patch level so an
+older SDK is rejected with GOTOOLCHAIN=local. Other SDK branches require
+their own advisory review; a higher version alone is not patch qualification.
+Normal CI and source analysis both select that exact maintained SDK; the scanner is
+still built separately with Go 1.27.4. This source change does not rebuild or
+qualify previously retained binaries.
+
+The candidate locks select these fixes from the public Go advisory reports:
+
+| Input | Previous version | Selected version | Review basis |
+| --- | --- | --- | --- |
+| Go SDK | Analysis: 1.25.14; minimum: 1.25.0 | 1.26.11 | [Go downloads](https://go.dev/dl/) and [GO-2026-6859](https://pkg.go.dev/vuln/GO-2026-6859) |
+| brotli | 1.2.4 | 1.2.7 | [GO-2026-6888](https://pkg.go.dev/vuln/GO-2026-6888) |
+| gorilla/websocket | 1.4.2 | 1.5.3 | [GO-2026-6278](https://pkg.go.dev/vuln/GO-2026-6278), an unreviewed database report; upstream's mask-key change was also inspected |
+| klauspost/compress | 1.17.8 | 1.20.2 | [GO-2026-6865](https://pkg.go.dev/vuln/GO-2026-6865) and [GO-2026-5841](https://pkg.go.dev/vuln/GO-2026-5841) |
+| OpenTelemetry root, metric and trace | 1.40.0 | 1.41.0 | [GO-2026-5506](https://pkg.go.dev/vuln/GO-2026-5506) |
+| x/crypto | 0.44.0 | 0.59.0 | Includes the reported [GO-2026-5932](https://pkg.go.dev/vuln/GO-2026-5932) fix and earlier matched fixes |
+| x/text | 0.31.0 | 0.44.0 | [GO-2026-5970](https://pkg.go.dev/vuln/GO-2026-5970) and [GO-2026-6629](https://pkg.go.dev/vuln/GO-2026-6629) |
+
+The op-geth replacement stays at v1.101702.2. Engine HTTP authentication now
+uses the existing JWT library directly instead of importing op-geth's node
+server solely for its authentication callback. Each request signs an HS256
+token containing only a fresh issued-at claim with the selected 32-byte secret,
+as required by the [Engine API authentication scheme](https://github.com/ethereum/execution-apis/blob/main/src/engine/authentication.md).
+The public Engine client API and payload methods are unchanged.
+The JWT dependency remains at v4.5.2; only its use becomes direct. Downstream
+consumers adopting these locks must also select a reviewed compatible SDK.
+
+The regression controls independently verify the wire token with HMAC-SHA256,
+check issued-at renewal using virtual time, exercise concurrent callbacks and
+use a loopback JSON-RPC server to check that DialEngine attaches authentication
+to actual requests. Their current execution results belong to the exact CI
+revision and attempt, rather than this description.
+
+[GO-2026-4479](https://pkg.go.dev/vuln/GO-2026-4479) has no known fixed DTLS v2
+release. Removing an unnecessary node-server import is not a fix to DTLS v2 or
+a major-version migration. Module/test dependency records and other consumers
+still require their own review. No advisory is suppressed: any finding in the
+current source/test scan continues to fail the review gate. The effective
+op-geth namespace, fork advisory coverage, distribution licenses, supported
+platforms, action/runtime updates and release acceptance remain separate work.
+
+The Docker builder selects the official Go 1.26.11 Alpine 3.24 image by its
+full multi-platform index digest and checks the actual SDK version before
+downloading and verifying modules. A separate fifteen-minute CI job builds the
+Linux CLI image and exercises its usage exit with networking disabled. It does
+not start the faucet, contact an engine or publish an image. Other platforms,
+image provenance, the mutable Docker frontend/runtime base and APK repository
+inputs remain separate review and reproducibility work. Weekly Docker update
+proposals do not establish that any update has been executed or accepted.

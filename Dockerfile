@@ -4,10 +4,14 @@
 #
 #   docker build -t zvm .
 
-FROM golang:1.25-alpine AS build
+FROM golang:1.26.11-alpine3.24@sha256:ae52b5bc6ed045a9ed26ab03dc19327a802a9cc9aa8b27ed57f5c6b60579b0bb AS build
+ENV GOTOOLCHAIN=local GOWORK=off GOTELEMETRY=off GOFLAGS=-mod=readonly
 WORKDIR /src
 COPY go.mod go.sum ./
-RUN --mount=type=cache,target=/go/pkg/mod go mod download
+RUN --mount=type=cache,target=/go/pkg/mod \
+    test "$(go env GOVERSION)" = go1.26.11 && \
+    go mod download && \
+    go mod verify
 COPY . .
 RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
     CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o /out/zvm ./cmd/zvm
