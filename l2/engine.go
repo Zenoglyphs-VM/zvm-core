@@ -8,15 +8,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/ethereum/go-ethereum/beacon/engine"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 // Engine is an authenticated Engine API client. The ZVM targets Isthmus
@@ -41,11 +43,26 @@ func ReadJWTSecret(path string) ([32]byte, error) {
 }
 
 func DialEngine(ctx context.Context, url string, secret [32]byte) (*Engine, error) {
-	c, err := rpc.DialOptions(ctx, url, rpc.WithHTTPAuth(node.NewJWTAuth(secret)))
+	c, err := rpc.DialOptions(ctx, url, rpc.WithHTTPAuth(engineAuth(secret)))
 	if err != nil {
 		return nil, err
 	}
 	return &Engine{c: c}, nil
+}
+
+// engineAuth signs each request with the Engine API's HS256 issued-at claim.
+// Importing the execution client's node server for this callback also imports
+// its NAT, STUN and DTLS stack, which this HTTP client does not need.
+func engineAuth(secret [32]byte) rpc.HTTPAuth {
+	return func(header http.Header) error {
+		claims := jwt.RegisteredClaims{IssuedAt: jwt.NewNumericDate(time.Now())}
+		encoded, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(secret[:])
+		if err != nil {
+			return fmt.Errorf("sign engine request: %w", err)
+		}
+		header.Set("Authorization", "Bearer "+encoded)
+		return nil
+	}
 }
 
 func (e *Engine) Close() { e.c.Close() }

@@ -19,7 +19,7 @@ def objects(raw):
     text, result = raw.decode(), []
     while text.strip():
         value, end = decoder.raw_decode(text.lstrip())
-        if not isinstance(value, dict) or len(result) >= 256:
+        if not isinstance(value, dict) or len(result) >= 512:
             raise ReviewError("invalid or excessive module inventory")
         result.append(value)
         text = text.lstrip()[end:]
@@ -119,7 +119,7 @@ def main():
         result = 2
     if created:
         save(args.output / "preparation.json", receipt)
-    print(json.dumps({"status": receipt["status"], "exit": result, "releaseAccepted": False}))
+    print(json.dumps({"status": receipt["status"], "exit": result, "failureStage": receipt.get("failureStage"), "releaseAccepted": False}))
     return result
 
 
