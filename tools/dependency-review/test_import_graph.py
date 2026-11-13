@@ -123,8 +123,17 @@ class ImportGraphTests(unittest.TestCase):
         with patch.object(graph, "MAX_BYTES", 16), self.assertRaises(ValueError):
             self.check(fixture())
 
-    def test_duplicate_import_edges_refused(self):
-        rows = fixture(); rows[0]["Imports"] *= 2; self.reject(rows)
+    def test_repeated_import_edges_preserve_occurrences_and_closure(self):
+        # The retained Go 1.26.11 test projection repeated identical import IDs.
+        rows = fixture(); baseline = self.check(rows)
+        rows[0]["Imports"] *= 2
+        rows[3]["Imports"] *= 2
+        result = self.check(rows)
+        self.assertEqual(result["entryImportClosure"], baseline["entryImportClosure"])
+        self.assertEqual(result["testImportClosure"], baseline["testImportClosure"])
+        self.assertEqual(result["importEdges"], baseline["importEdges"])
+        self.assertEqual(result["importEdgeOccurrences"], baseline["importEdgeOccurrences"] + 2)
+        self.assertEqual(result["duplicateImportEdgeOccurrences"], 2)
 
 
 if __name__ == "__main__":

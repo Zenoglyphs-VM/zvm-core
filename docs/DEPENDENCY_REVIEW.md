@@ -151,6 +151,8 @@ has a 120-second deadline; package output is capped at 4 MiB and stderr at 64 Ki
 The consumer requires exact SDK/profile/source/tree/lock observations, complete
 producer streams, a closed acyclic graph, coherent test contexts and versioned
 replacement identities. Missing or incomplete records fail the graph step.
+Repeated identical import IDs are counted as raw occurrences separately from
+distinct graph edges; different test variants retain their full identities.
 Data-only controls exercise these refusal boundaries; actual Go execution needs
 the exact hosted workflow attempt.
 

@@ -99,7 +99,7 @@ def summarize(raw, *, entry):
             raise ReviewError("test variant disagrees with ForTest")
         imports = row["Imports"]
         if (not isinstance(imports, list) or len(imports) > 2048
-                or any(not isinstance(v, str) for v in imports) or len(set(imports)) != len(imports)):
+                or any(not isinstance(v, str) for v in imports)):
             raise ReviewError("invalid import edges")
         for imported in imports:
             package_id(imported)
@@ -161,8 +161,11 @@ def summarize(raw, *, entry):
                             if not row["DepOnly"] and not row["ForTest"] and not name.endswith(".test"))
     cli = closure([entry])
     tests = closure(test_roots)
+    distinct_edges = sum(len(set(row["Imports"])) for row in packages.values())
     return {"schema": 1, "status": "SELECTED_IMPORT_GRAPHS_RECORDED", "entryPackage": entry,
-            "packageRecords": len(packages), "importEdges": edges, "ordinaryRoots": ordinary_roots,
+            "packageRecords": len(packages), "importEdges": distinct_edges,
+            "importEdgeOccurrences": edges, "duplicateImportEdgeOccurrences": edges - distinct_edges,
+            "ordinaryRoots": ordinary_roots,
             "testRoots": test_roots, "entryImportClosure": sorted(cli),
             "testImportClosure": sorted(tests), "testOnlyImportIDs": sorted(tests - cli),
             "selectedModules": [modules[name] for name in sorted(modules)],
