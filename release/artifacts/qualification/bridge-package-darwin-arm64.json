@@ -1,0 +1,280 @@
+{
+  "schema": 1,
+  "scope": "Local darwin/arm64 Bridge executable, source-bound SPDX, complete parent/Core contents and canonical archive qualification.",
+  "bridgeCommit": "3f8f1197a91e530590f9e1c21ae55d358f62296d",
+  "coreCommit": "29e6d9b30be94de3772c850c7a1e9811585a8833",
+  "qualificationContext": "synthetic local release envelope",
+  "subject": {
+    "bytes": 31765666,
+    "sha256": "5a66ed63014ae1ccd05c961a93add232406d8f79647883c6fc27daa7ad3e18fe"
+  },
+  "spdx": {
+    "bytes": 98068,
+    "sha256": "16f71bf68da1c3e76fe19426f2c102d294e711d6c19f5abe6d74c16ea4f96e50"
+  },
+  "nativeRecipe": {
+    "CoreCommit": "29e6d9b30be94de3772c850c7a1e9811585a8833",
+    "CoreSourceBatchSHA256": "f2086f3d4b7111352f5c44b106703c5b0f258da079c317114f8f9ddd4dc8f602",
+    "CoreTree": "86f8c8cb55fb298674a73242a928141eebc1dee6",
+    "DockerImageExecuted": false,
+    "DockerfileSHA256": "83fec126f8e4a7db73f5cbb12a669342b1ed8a0118238e8a0888a8584ec5cc09",
+    "flags": [
+      "-p=1",
+      "-mod=readonly",
+      "-trimpath",
+      "-buildvcs=false"
+    ],
+    "goVersion": "go1.25.14",
+    "linkerFlags": "-s -w",
+    "maxSubjectBytes": 67108864,
+    "repository": "Zenoglyphs-VM/zvm-bridge",
+    "selectedSDKTools": {
+      "bin/go": "55770db639faa42f3ebc998ac583b008f7ff2b4bbb9dbb8a76511a9a6ffa4a19",
+      "pkg/tool/darwin_arm64/asm": "9d0ded120d0a7a94000f1a0b3878a2665b9aff7d19680ee3fd001c16c711b87d",
+      "pkg/tool/darwin_arm64/compile": "690632186771018287e53a5c24256c97e687633370dee55b5d8c96564d95f65a",
+      "pkg/tool/darwin_arm64/link": "5cae2b7dc4fe7e5a3fbcf7a93654f27ca494093fe7d7246e4339cd644f272cb5"
+    },
+    "sourceBatchSHA256": "a080cca20a9b7f7adf096047a520751ec6ec0cb6c851caff643892928e3671ee",
+    "sourceCommit": "3f8f1197a91e530590f9e1c21ae55d358f62296d",
+    "sourceGraphSHA256": "7419e38a888971a2569fb135435ad47a7b9a663993a62f75f2a13753ecae6fd4",
+    "sourceTree": "3afa12d95171186e7f064187473458d836486143",
+    "target": {
+      "CGO_ENABLED": "0",
+      "GOARCH": "arm64",
+      "GOARM64": "v8.0",
+      "GOOS": "darwin"
+    }
+  },
+  "nativeRecipeSha256": "d8acf7c734ad3a1ef0fd89328487ad5fdcf5929c3932e659fec7edc4d8490efe",
+  "nativeBuilds": 1,
+  "nativeCommands": [
+    {
+      "label": "Build one Bridge darwin/arm64 subject",
+      "actual_exit": 0,
+      "expected_exit": 0,
+      "output_complete": true
+    },
+    {
+      "label": "Read Bridge Go executable build information",
+      "actual_exit": 0,
+      "expected_exit": 0,
+      "output_complete": true
+    },
+    {
+      "label": "Generate Bridge source-bound SPDX",
+      "actual_exit": 0,
+      "expected_exit": 0,
+      "output_complete": true
+    },
+    {
+      "label": "Verify Bridge source-bound SPDX",
+      "actual_exit": 0,
+      "expected_exit": 0,
+      "output_complete": true
+    },
+    {
+      "label": "Reject unselected main package",
+      "actual_exit": 1,
+      "expected_exit": 1,
+      "output_complete": true
+    },
+    {
+      "label": "Reject changed remote module checksum",
+      "actual_exit": 1,
+      "expected_exit": 1,
+      "output_complete": true
+    },
+    {
+      "label": "Reject changed Core source tree",
+      "actual_exit": 1,
+      "expected_exit": 1,
+      "output_complete": true
+    }
+  ],
+  "serviceExecutions": 0,
+  "sourceBoundSPDXReceipt": {
+    "compilerUseOfTreesProven": false,
+    "completeRuntimeInventoryEstablished": false,
+    "goBuildInfoMatched": true,
+    "licenseCoverageEstablished": false,
+    "localCommitObjectsVerified": 1,
+    "localSourceBytesVerified": 1155787,
+    "localSourceFilesVerified": 112,
+    "localSourceTreesVerified": 1,
+    "lockedModulesMatched": true,
+    "modulesVerified": 90,
+    "parentSourceTreeVerified": false,
+    "policySha256": "cb6a79210090198c0ac6985a69d25f69abf702643dbc2f9a343e4a16213ae9b0",
+    "profile": "spdx-2.3-go-local-source-v1",
+    "releaseAccepted": false,
+    "sbomSha256": "16f71bf68da1c3e76fe19426f2c102d294e711d6c19f5abe6d74c16ea4f96e50",
+    "sourceCommitAuthenticated": false,
+    "spdxProfileVerified": true,
+    "subjectBytesVerified": true,
+    "subjectSha256": "5a66ed63014ae1ccd05c961a93add232406d8f79647883c6fc27daa7ad3e18fe",
+    "toolchainIdentityAuthenticated": false
+  },
+  "parentContentsReceipt": {
+    "buildRecipeReproduced": false,
+    "bytesVerified": 31864258,
+    "compilerUseOfTreesProven": false,
+    "completeRuntimeInventoryEstablished": false,
+    "contentsPolicySha256": "5d79fe6ed2af1a3a80e2f182473c99ebe1768cae292660660ba71626280dea28",
+    "controlFilesVerified": 4,
+    "filesVerified": 5,
+    "goModuleRecordsVerified": 90,
+    "licenseCoverageEstablished": false,
+    "localCommitObjectsVerified": 1,
+    "localSourceBytesVerified": 1155787,
+    "localSourceFilesVerified": 112,
+    "localSourceTreesVerified": 1,
+    "manifestSha256": "86e3ca460aa125b156d840eb637cb406650c9d50fd7289ace71638edea5f6ecb",
+    "parentCommitObjectsVerified": 1,
+    "parentGitlinksBound": 1,
+    "parentSourceBytesVerified": 214717,
+    "parentSourceFilesVerified": 33,
+    "parentSourcePoliciesVerified": 1,
+    "parentSourcePolicySetSha256": "31b7ae24affef1af4e157383e7ada291d7f795e05e196c177617cd6cc0f84f47",
+    "parentSourceProfile": "git-go-parent-contents-v1",
+    "parentSourceTreeVerified": true,
+    "parentSourceTreesVerified": 1,
+    "policySha256": "8e4af86e32e5cac09139dbdeb755c901e5892f4f0eb24e86983eebe897bfc0d9",
+    "provenanceSignaturesVerified": false,
+    "releaseAccepted": false,
+    "sbomContentsVerified": true,
+    "sbomProfileScope": "spdx-2.3-go-local-source-v1",
+    "sbomProfilesVerified": 1,
+    "selectionVerified": true,
+    "sourceCommitAuthenticated": false,
+    "toolchainIdentityAuthenticated": false
+  },
+  "parentContentsRepeatByteIdentical": true,
+  "legacyContentsParentSourceVerified": false,
+  "parentRefusals": 4,
+  "initialContentsAttempt": {
+    "outerExit": 1,
+    "completeCommandObservationsReused": 6,
+    "preparationFailure": "A read-only disposable SPDX clone could not be mutated.",
+    "originalFailurePreserved": true,
+    "cleanupHoldPreserved": true
+  },
+  "followupAttempt": {
+    "outerExit": 0,
+    "newCommands": 3,
+    "completedCommandsRepeated": 0,
+    "newNativeBuilds": 0,
+    "dependencyDownloads": 0,
+    "scratchRemoved": true
+  },
+  "archivePolicy": {
+    "schema": 1,
+    "format": "zip-store-v1",
+    "manifestSha256": "86e3ca460aa125b156d840eb637cb406650c9d50fd7289ace71638edea5f6ecb",
+    "selectionPolicySha256": "8e4af86e32e5cac09139dbdeb755c901e5892f4f0eb24e86983eebe897bfc0d9",
+    "sourceDateEpoch": 1767225600
+  },
+  "archive": {
+    "sha256": "753a73e65a9f6c0856ecc687c133a23b46f883743f572c3ca1c0c6da4d38ef31",
+    "bytes": 31869805
+  },
+  "sameParentContentsManifest": true,
+  "streamedProductions": 2,
+  "secondArchiveFileWritten": false,
+  "producerStreamsByteIdentical": true,
+  "independentZipEntriesVerified": 7,
+  "incorrectIndependentArchiveDigestRefused": true,
+  "archiveReceipt": {
+    "archiveBytes": 31869805,
+    "archivePolicySha256": "8df2ad709759cf509c69b8d13ede6ebd44e5691bf4ef566e4e1a4908f262ea76",
+    "archiveSelectionVerified": true,
+    "archiveSha256": "753a73e65a9f6c0856ecc687c133a23b46f883743f572c3ca1c0c6da4d38ef31",
+    "deterministicMetadataVerified": true,
+    "filesVerified": 5,
+    "manifestSha256": "86e3ca460aa125b156d840eb637cb406650c9d50fd7289ace71638edea5f6ecb",
+    "policySha256": "8e4af86e32e5cac09139dbdeb755c901e5892f4f0eb24e86983eebe897bfc0d9",
+    "provenanceSignaturesVerified": false,
+    "releaseAccepted": false,
+    "sbomContentsVerified": false
+  },
+  "artifactCheckSha256": "6eb2a5a32904d60a26c00900d0a8eb3f13545fd2b9c365ccd899e2df5b1ff5cb",
+  "packerSha256": "6a6f3cb9502650d07df0e670144122c278091485b3bc90bba14f020a90c2efea",
+  "checkedPackerSourceFiles": {
+    "cmd/zvm-artifact-pack/main.go": "fd77e51b9054d7a6c5e0c98b3636e67b8d1b500fd7fe7a1cbed3199e02bc02b4",
+    "release/artifacts/archive.go": "fc1cdd37656792142375c67ce2248a05bba84573965b634c4162da17afcaccdf"
+  },
+  "subjectAndArchiveDistributed": false,
+  "projectSigningPerformed": false,
+  "fullD02AcceptanceComplete": false,
+  "productionGate": "NO_GO",
+  "officialSchemaQualification": {
+    "schemaRepository": "spdx/spdx-spec",
+    "schemaRef": "v2.3.1",
+    "schemaCommit": "6f2cb47d13db19b12c23885573b22ef32ec1ada5",
+    "schemaPath": "schemas/spdx-schema.json",
+    "schemaURL": "https://github.com/spdx/spdx-spec/blob/6f2cb47d13db19b12c23885573b22ef32ec1ada5/schemas/spdx-schema.json",
+    "schemaSha256": "4126dc29f15e92feec92e9622f4939131ad58b125d6f578aa93e980a6e6f3212",
+    "schemaGitBlob": "2dc11d1a34268227b63113d788b89efd75b5d2a8",
+    "documentSha256": "16f71bf68da1c3e76fe19426f2c102d294e711d6c19f5abe6d74c16ea4f96e50",
+    "documentBytes": 98068,
+    "validator": "Ajv2019",
+    "validatorVersion": "8.17.1",
+    "dialect": "https://json-schema.org/draft/2019-09/schema",
+    "selectedPackageVersions": {
+      "ajv": "8.17.1",
+      "fast-deep-equal": "3.1.3",
+      "fast-uri": "3.0.1",
+      "json-schema-traverse": "1.0.0",
+      "require-from-string": "2.0.2"
+    },
+    "nodeVersion": "24.22.1",
+    "selectedNodeSha256": "cf52d093e9b728a7e6929a4371fa37d271304383e7e7c9f0f0e32fb00373b32c",
+    "previousRuntimePinChanged": true,
+    "previousRuntimeQualificationReused": false,
+    "validatorOriginAuthenticated": false,
+    "positiveSchemaPassed": true,
+    "malformedSchemaControlsPassed": 6,
+    "malformedSchemaControls": [
+      "missing-required",
+      "wrong-root-type",
+      "additional-property",
+      "invalid-checksum",
+      "invalid-package-purpose",
+      "invalid-relationship"
+    ],
+    "schemaValidChangedSubjectSha256": "f043e7be1490d4c81696258fb4cdf8ed6fb1376db3d420f9eb38757f1b81981d",
+    "schemaValidChangedSubjectSemanticallyRefused": true,
+    "originalDocumentSemanticProfileReceipt": {
+      "compilerUseOfTreesProven": false,
+      "completeRuntimeInventoryEstablished": false,
+      "goBuildInfoMatched": true,
+      "licenseCoverageEstablished": false,
+      "localCommitObjectsVerified": 1,
+      "localSourceBytesVerified": 1155787,
+      "localSourceFilesVerified": 112,
+      "localSourceTreesVerified": 1,
+      "lockedModulesMatched": true,
+      "modulesVerified": 90,
+      "parentSourceTreeVerified": false,
+      "policySha256": "cb6a79210090198c0ac6985a69d25f69abf702643dbc2f9a343e4a16213ae9b0",
+      "profile": "spdx-2.3-go-local-source-v1",
+      "releaseAccepted": false,
+      "sbomSha256": "16f71bf68da1c3e76fe19426f2c102d294e711d6c19f5abe6d74c16ea4f96e50",
+      "sourceCommitAuthenticated": false,
+      "spdxProfileVerified": true,
+      "subjectBytesVerified": true,
+      "subjectSha256": "5a66ed63014ae1ccd05c961a93add232406d8f79647883c6fc27daa7ad3e18fe",
+      "toolchainIdentityAuthenticated": false
+    },
+    "semanticProfileChecks": 2,
+    "semanticToolSha256": "e641b2d87b26a333ed37921bdbb0168b9e1ace7454bb9e094413040724c7a2ad",
+    "newDownloadsOrInstalls": 0,
+    "newNativeBuilds": 0,
+    "serviceExecutions": 0,
+    "temporaryValidatorJSJSONFiles": 171,
+    "temporaryValidatorJSJSONBytes": 478592,
+    "temporarySourceFiles": 112,
+    "ownedScratchRemoved": true,
+    "officialSchemaResultReusedForDifferentBytes": false,
+    "fullD02AcceptanceComplete": false
+  }
+}

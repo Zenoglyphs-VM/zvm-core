@@ -1,0 +1,274 @@
+{
+  "schema": 1,
+  "scope": "Complete parent-source contents observation for the retained original darwin/arm64 Core executable; existing exact-byte SPDX, schema and archive observations are reused.",
+  "qualificationContext": "synthetic local release envelope",
+  "originalCoreSource": {
+    "repository": "Zenoglyphs-VM/zvm-core",
+    "commit": "89b482274f17a4d585aebd1324dce328663b93d3",
+    "tree": "b570fd49c9937fd14104f905dc88bbf895bafb4b",
+    "gitlinks": []
+  },
+  "parentSourceFiles": 137,
+  "parentSourceBytes": 1367434,
+  "independentParentPolicySha256": "18d697c56860a1e3fcee05acb07f64dbcc46156e280a224c0ad0cdf6af0e69e7",
+  "subject": {
+    "bytes": 42564978,
+    "sha256": "97413c732bb0840bf0f270422640bd72ccabd654564ca446e3ab14044c8a8fbf"
+  },
+  "spdx": {
+    "bytes": 87049,
+    "sha256": "537c7a3d1d33cfdf0d42aedf046861c098f195d4f8c517f93508b0815161d5d1"
+  },
+  "retainedArchive": {
+    "bytes": 42657481,
+    "sha256": "cdfbc746fd309f8ac71febd63c52a6f6d59405a94e2ecbdeca57924dae7c6434"
+  },
+  "historicalNativeRecipe": {
+    "schema": 1,
+    "scope": "Local qualification candidate; no release or signing authority",
+    "source": {
+      "repository": "Zenoglyphs-VM/zvm-core",
+      "commit": "89b482274f17a4d585aebd1324dce328663b93d3",
+      "tree": "b570fd49c9937fd14104f905dc88bbf895bafb4b",
+      "gitlinks": []
+    },
+    "mainPackage": "./cmd/zvm",
+    "goVersion": "go1.25.14",
+    "goFlags": [
+      "-p=2",
+      "-mod=readonly",
+      "-trimpath",
+      "-buildvcs=true"
+    ],
+    "linkerFlags": "",
+    "target": {
+      "GOOS": "darwin",
+      "GOARCH": "arm64",
+      "GOARM64": "v8.0",
+      "CGO_ENABLED": "0"
+    },
+    "sourceDateEpoch": 1767225600,
+    "goModSha256": "ee73727a250f768a34cebce98a678f393906a9a1e98e83b54519cf94d30ca91a",
+    "goSumSha256": "7e3f039005118f12158d9cb7714f9c8ffb4cf365c393cf4e2ee030d5ba316d49",
+    "selectedSDKTools": {
+      "bin/go": "55770db639faa42f3ebc998ac583b008f7ff2b4bbb9dbb8a76511a9a6ffa4a19",
+      "pkg/tool/darwin_arm64/compile": "690632186771018287e53a5c24256c97e687633370dee55b5d8c96564d95f65a",
+      "pkg/tool/darwin_arm64/link": "5cae2b7dc4fe7e5a3fbcf7a93654f27ca494093fe7d7246e4339cd644f272cb5",
+      "pkg/tool/darwin_arm64/asm": "9d0ded120d0a7a94000f1a0b3878a2665b9aff7d19680ee3fd001c16c711b87d"
+    },
+    "buildReproductionEstablished": false,
+    "nativeExecutionScope": "Empty-argument usage only under OS network denial",
+    "releaseAccepted": false
+  },
+  "historicalNativeRecipeSha256": "47b97337eed4c3dbf7ed0c57e7f69893accac25f8363a6c9723c07da335c703a",
+  "historicalSourcePackageGraph": {
+    "sha256": "4930920daac7beb6f815b3b56629a47e3e2c952ba12e37381cdec2b3fc092e7d",
+    "bytes": 2614339
+  },
+  "historicalSourcePackages": 624,
+  "remoteModuleRecords": 80,
+  "existingExactByteSPDXReceipt": {
+    "profile": "spdx-2.3-go-buildinfo-v1",
+    "policySha256": "e9165ce8b9adf9ab0faac7f32af6a6bbab3d4a5aba9b7b6ba33817ef4f23fb0f",
+    "sbomSha256": "537c7a3d1d33cfdf0d42aedf046861c098f195d4f8c517f93508b0815161d5d1",
+    "subjectSha256": "97413c732bb0840bf0f270422640bd72ccabd654564ca446e3ab14044c8a8fbf",
+    "modulesVerified": 80,
+    "spdxProfileVerified": true,
+    "subjectBytesVerified": true,
+    "goBuildInfoMatched": true,
+    "lockedModulesMatched": true,
+    "sourceCommitAuthenticated": false,
+    "toolchainIdentityAuthenticated": false,
+    "completeRuntimeInventoryEstablished": false,
+    "licenseCoverageEstablished": false,
+    "releaseAccepted": false
+  },
+  "parentContentsReceipt": {
+    "buildRecipeReproduced": false,
+    "bytesVerified": 42652619,
+    "compilerUseOfTreesProven": false,
+    "completeRuntimeInventoryEstablished": false,
+    "contentsPolicySha256": "b84a805646e2f16fb6d6917936d8967eb4c8d50a1b38e77b1d79d7e520f32be2",
+    "controlFilesVerified": 3,
+    "filesVerified": 5,
+    "goModuleRecordsVerified": 80,
+    "licenseCoverageEstablished": false,
+    "localCommitObjectsVerified": 0,
+    "localSourceBytesVerified": 0,
+    "localSourceFilesVerified": 0,
+    "localSourceTreesVerified": 0,
+    "manifestSha256": "6749b015e02a9745e7f3b7598fe938ee65fd43daa51dd1a5f43a5dff4386e414",
+    "parentCommitObjectsVerified": 1,
+    "parentGitlinksBound": 0,
+    "parentSourceBytesVerified": 1367434,
+    "parentSourceFilesVerified": 137,
+    "parentSourcePoliciesVerified": 1,
+    "parentSourcePolicySetSha256": "c498f43d3f418beac66cdc03fcceb24679297de30d7d5ef53a116ce0197d58d8",
+    "parentSourceProfile": "git-go-parent-contents-v1",
+    "parentSourceTreeVerified": true,
+    "parentSourceTreesVerified": 1,
+    "policySha256": "46d9307ca81178bd988eb875ca8b64b180e28180ca221a631e8867719c3d9945",
+    "provenanceSignaturesVerified": false,
+    "releaseAccepted": false,
+    "sbomContentsVerified": true,
+    "sbomProfileScope": "spdx-2.3-go-buildinfo-v1",
+    "sbomProfilesVerified": 1,
+    "selectionVerified": true,
+    "sourceCommitAuthenticated": false,
+    "toolchainIdentityAuthenticated": false
+  },
+  "parentContentsRepeatByteIdentical": true,
+  "legacyContentsReceipt": {
+    "buildRecipeReproduced": false,
+    "bytesVerified": 42652619,
+    "completeRuntimeInventoryEstablished": false,
+    "contentsPolicySha256": "b84a805646e2f16fb6d6917936d8967eb4c8d50a1b38e77b1d79d7e520f32be2",
+    "controlFilesVerified": 3,
+    "filesVerified": 5,
+    "goModuleRecordsVerified": 80,
+    "licenseCoverageEstablished": false,
+    "manifestSha256": "6749b015e02a9745e7f3b7598fe938ee65fd43daa51dd1a5f43a5dff4386e414",
+    "policySha256": "46d9307ca81178bd988eb875ca8b64b180e28180ca221a631e8867719c3d9945",
+    "provenanceSignaturesVerified": false,
+    "releaseAccepted": false,
+    "sbomContentsVerified": true,
+    "sbomProfileScope": "spdx-2.3-go-buildinfo-v1",
+    "sbomProfilesVerified": 1,
+    "selectionVerified": true,
+    "sourceCommitAuthenticated": false,
+    "toolchainIdentityAuthenticated": false
+  },
+  "legacyParentSourceFieldPresent": false,
+  "legacyParentSourceVerified": false,
+  "parentAndSPDXRefusals": 4,
+  "refusalScopes": [
+    "independent parent policy digest",
+    "different valid Core source revision",
+    "unselected artifact identifier",
+    "changed SPDX despite consistent selected file hashes"
+  ],
+  "commands": [
+    {
+      "label": "Verify original Core subject with complete independently selected parent source",
+      "actual_exit": 0,
+      "expected_exit": 0,
+      "output_complete": true,
+      "seconds": 0.354
+    },
+    {
+      "label": "Repeat original Core complete parent-source contents observation",
+      "actual_exit": 0,
+      "expected_exit": 0,
+      "output_complete": true,
+      "seconds": 0.075
+    },
+    {
+      "label": "Verify original Core legacy contents observation",
+      "actual_exit": 0,
+      "expected_exit": 0,
+      "output_complete": true,
+      "seconds": 0.046
+    },
+    {
+      "label": "Reject incorrect independent Core parent policy digest",
+      "actual_exit": 1,
+      "expected_exit": 1,
+      "output_complete": true,
+      "seconds": 0.006
+    },
+    {
+      "label": "Reject a different valid Core source revision for the original subject",
+      "actual_exit": 1,
+      "expected_exit": 1,
+      "output_complete": true,
+      "seconds": 0.028
+    },
+    {
+      "label": "Reject an unselected original Core artifact identifier",
+      "actual_exit": 1,
+      "expected_exit": 1,
+      "output_complete": true,
+      "seconds": 0.007
+    },
+    {
+      "label": "Reject changed original Core SPDX despite consistent selected file hashes",
+      "actual_exit": 1,
+      "expected_exit": 1,
+      "output_complete": true,
+      "seconds": 0.064
+    }
+  ],
+  "existingOfficialSchemaQualification": {
+    "schemaRepository": "spdx/spdx-spec",
+    "schemaRef": "v2.3.1",
+    "schemaCommit": "6f2cb47d13db19b12c23885573b22ef32ec1ada5",
+    "schemaPath": "schemas/spdx-schema.json",
+    "schemaURL": "https://github.com/spdx/spdx-spec/blob/6f2cb47d13db19b12c23885573b22ef32ec1ada5/schemas/spdx-schema.json",
+    "receipt": {
+      "official_schema_positive_passed": true,
+      "official_schema_negative_controls_passed": 6,
+      "schema_valid_changed_subject_requires_semantic_profile_check": true,
+      "validator": "Ajv2019",
+      "version": "8.17.1",
+      "dialect": "https://json-schema.org/draft/2019-09/schema",
+      "schema_sha256": "4126dc29f15e92feec92e9622f4939131ad58b125d6f578aa93e980a6e6f3212",
+      "actual_document_sha256": "537c7a3d1d33cfdf0d42aedf046861c098f195d4f8c517f93508b0815161d5d1",
+      "network_disabled_by_parent_OS_policy": true
+    },
+    "sameDocumentBytes": true,
+    "executionsDuringThisObservation": 0
+  },
+  "existingArchiveReceipt": {
+    "archiveSha256": "cdfbc746fd309f8ac71febd63c52a6f6d59405a94e2ecbdeca57924dae7c6434",
+    "archiveBytes": 42657481,
+    "manifestSha256": "6749b015e02a9745e7f3b7598fe938ee65fd43daa51dd1a5f43a5dff4386e414",
+    "policySha256": "46d9307ca81178bd988eb875ca8b64b180e28180ca221a631e8867719c3d9945",
+    "archivePolicySha256": "a865589ff71c6e839d45cb5b0ffed08a4a7672f87820ce82535252f0531a05b4",
+    "filesVerified": 5,
+    "archiveSelectionVerified": true,
+    "deterministicMetadataVerified": true,
+    "provenanceSignaturesVerified": false,
+    "sbomContentsVerified": false,
+    "releaseAccepted": false
+  },
+  "samePreviouslyQualifiedArchiveManifest": true,
+  "archiveProductionsDuringThisObservation": 0,
+  "nativeBuildsDuringThisObservation": 0,
+  "SPDXGenerationsDuringThisObservation": 0,
+  "serviceExecutionsDuringThisObservation": 0,
+  "dependencyDownloadsDuringThisObservation": 0,
+  "retainedCheckerSha256": "6eb2a5a32904d60a26c00900d0a8eb3f13545fd2b9c365ccd899e2df5b1ff5cb",
+  "checkedVerifierSourceFiles": {
+    "cmd/zvm-artifact-check/main.go": "d2a61aedce1d4bfbc754561a4b851e8b4105d7fbb24c15cd312b020548b04ed1",
+    "release/artifacts/archive.go": "fc1cdd37656792142375c67ce2248a05bba84573965b634c4162da17afcaccdf",
+    "release/artifacts/buildinfo.go": "564d1d91c71e260de7b640690d9bc117aabcf1e41ab021f8ebffa885379264f6",
+    "release/artifacts/contents.go": "d7d05563bdae317fe743d0a33b1741575438082a5e48dc964bc8c417b8943b3f",
+    "release/artifacts/contents_source.go": "cc24c877b96d5855afcddb2fa3e60ed451c7f6903e69787f60d7f26bd2167d30",
+    "release/artifacts/files.go": "8dd11bddb10b30ba8d6f5c5755b865f4b02c5df0ce6e5836a81565425eb3227d",
+    "release/artifacts/files_other.go": "ca477ae268dc5150964a67471bd3f649435a294b89595be95f223290d5992d3c",
+    "release/artifacts/files_unix.go": "309b0479fa5825d0736e2fe8514e655722a8e26f494da52cfc2617fcca9a00aa",
+    "release/artifacts/json.go": "d0d7d7f522dc9c8ba0469ec51bbe559d1da1aeadb8553e27062662b95aee46d1",
+    "release/artifacts/manifest.go": "aa9a34c752d1f3a3fc3b05e977666a0212f315c37d6207fd44778441380ab47d",
+    "release/artifacts/provenance.go": "bde81dd77192912d807bba30b3f92c79c213812b035dea84f8578c79327367e4",
+    "release/artifacts/provenance_result.go": "ec05d7a96c65a2d5da190963529b21301be15d94560d84442842c31b1ce69d9b",
+    "release/artifacts/sbom.go": "ad62583631c096fd04bfbcdde2548f502d88c04e5d40f2746e4ecc646944399a",
+    "release/artifacts/sbom_spdx.go": "67640436f4db8a63ecd49208975fbc6f3f4a30c16b88fa6345a4690d8d2f59d8",
+    "release/artifacts/source_check.go": "b8d633dbb4aa06d0c76a5a4ae0dee2537384f142d82a85cd2f0e7f681f00a5a5",
+    "release/artifacts/source_sbom.go": "b170af740ba37fd980597e48338985847976a9fe7b2f1ded67c740350d96bb16",
+    "release/artifacts/source_tree.go": "f94c51d05ead3c40bcde02f89aeccf2858526dd6870ea3b7b869d8583c8f9bb7",
+    "release/artifacts/verifier.go": "b30169aa19a5a5299e7f8cb480b70e838eecfa8fada046ffeaf2c29a61a301b7",
+    "release/artifacts/contents_parent.go": "1cecb64927cb4c5d692c2a33082fb9ea38f8af989a72ea6db6a3872e7a82ca97"
+  },
+  "historicalFailedEnclosingOwnerPreserved": true,
+  "historicalCompletedResultsReconciledBySuccessfulOwner": true,
+  "oldBinaryRelabelledAsCurrentConsumerOrPublicationHeadBuild": false,
+  "historicalVCSAndQualificationContextPreserved": true,
+  "compilerUseOfCompleteParentTreeProven": false,
+  "sourceOrToolchainOriginAuthenticated": false,
+  "independentBuildReproductionEstablished": false,
+  "binarySPDXAndArchivePayloadsDistributed": false,
+  "projectSigningPerformed": false,
+  "ownedScratchRemoved": true,
+  "fullD02AcceptanceComplete": false,
+  "productionGate": "NO_GO"
+}

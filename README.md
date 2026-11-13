@@ -48,3 +48,54 @@ each as a git submodule at `./zvm-core`.
 
 MIT licence; third-party bytecode is listed in [NOTICE.md](NOTICE.md). The
 full guide, with how it works and why: [docs/GUIDE.md](docs/GUIDE.md).
+
+## Offline release verification
+
+The optional `zvm release-message` and `zvm release-verify` commands bind signed
+release inventories to source, artifact, genesis and saved contract build inputs.
+See [the release verification guide](release/README.md) for the independent policy
+and trust inputs, supported material formats and acceptance limits. These commands
+do not publish a release or establish a running deployment.
+
+The standalone `go build ./cmd/zvm-artifact-check` command checks a dedicated
+artifact directory against an independent byte-selection policy. See the
+[artifact verification guide](release/artifacts/README.md) for its optional
+provenance mode, which adds a pinned local verifier/root and exact source/workflow
+policy. SBOM content, build reproduction and release acceptance remain unverified.
+
+The standalone `go build ./cmd/zvm-sbom` command produces or checks a selected
+SPDX 2.3 Go build inventory against independent artifact/source/module inputs.
+See the [Go SBOM profile](release/artifacts/SBOM.md) for its exact checksum,
+replacement, metadata and coverage boundaries. Full runtime/license coverage,
+source authority and release acceptance remain unqualified.
+
+The artifact checker can combine the selected Go SBOM controls and the optional
+signature verifier inside one observed file inventory. See the
+[contents composition guide](release/artifacts/CONTENTS.md) for independent
+control pins, exact source/qualification/platform bindings and result scope.
+
+The standalone `go build ./cmd/zvm-artifact-pack` command streams a deterministic
+selected-file ZIP and verifies independently pinned packages without extraction.
+See the [archive profile](release/artifacts/ARCHIVE.md) for fixed metadata,
+explicit inventory, failure retention and distribution/acceptance boundaries.
+
+The SBOM command also has an explicit [local source profile](release/artifacts/LOCAL-SOURCES.md)
+for independently pinned flat Core replacements. It checks source files and Git
+object bindings without running Git, fetching modules or exporting machine paths.
+Explicit contents schema 2 composes it with selected files and optional signatures,
+retaining source observations through final verification. Default release selection
+and release acceptance retain their existing scope.
+
+The [service source cohort](release/artifacts/SERVICE-OUTPUTS.md) records current
+Node, Relayer and Bridge source/package expectations for later artifact checks,
+with native-platform, Docker and release qualification boundaries kept explicit.
+
+The standalone `go build ./cmd/zvm-source-check` command checks complete parent
+source exports, declared Gitlink entries and selected raw commit controls against
+an independent policy SHA-256. See the [source tree preflight](release/artifacts/SOURCE-TREES.md)
+for separate child-tree, compiler-use, artifact-composition and authority limits.
+
+The artifact checker also provides an explicit [parent contents mode](release/artifacts/PARENT-CONTENTS.md).
+It binds independently selected complete parent exports to contents and optional
+provenance while retaining source observations through final checks. Existing
+contents APIs retain their original parent-tree scope.
