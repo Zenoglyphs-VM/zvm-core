@@ -135,6 +135,35 @@ Protocol and limits: [govulncheck v1.9.0](https://pkg.go.dev/golang.org/x/vuln/c
 [stream protocol](https://github.com/golang/vuln/blob/e672cbe8fbc8c76e28fcb6db0efd9ce354e0dac5/internal/govulncheck/govulncheck.go),
 and [Go vulnerability database](https://go.dev/doc/security/vuln/database).
 
+## Selected CLI and test import graphs
+
+After a successful source scan, the same analysis SDK/cache records the complete
+`go list -deps -test` import graph for Linux/amd64 with CGO disabled. A fixed Go
+template emits only package identifiers, import edges, test context and selected
+nominal/effective module identities. Absolute source/cache paths and generated
+filenames are not requested. `go list -json=Fields` specifies required fields,
+so it is not used as a field-exclusion guarantee. See the
+[Go list contract](https://pkg.go.dev/cmd/go#hdr-List_packages_or_modules).
+
+The observer disables toolchain switching and module downloads, uses the populated
+analysis cache, and preserves read-only module selection. Each metadata command
+has a 120-second deadline; package output is capped at 4 MiB and stderr at 64 KiB.
+The consumer requires exact SDK/profile/source/tree/lock observations, complete
+producer streams, a closed acyclic graph, coherent test contexts and versioned
+replacement identities. Missing or incomplete records fail the graph step.
+Data-only controls exercise these refusal boundaries; actual Go execution needs
+the exact hosted workflow attempt.
+
+`import-graph/graph.json` separates the CLI entry's transitive package import
+closure from test graphs and retains nominal module paths alongside replacements.
+Package presence is build-profile evidence, not proof that a vulnerable function
+executes. Package absence covers only this selected profile. Function-level
+reachability, reflection/dynamic behavior, upstream/fork advisory mapping, other
+entrypoints, platforms, build tags, CGO profiles and release review remain open.
+No advisory finding is suppressed and no waiver is generated. Projected producer
+output and actual process/source receipts remain in the same attempt's report
+archive, including failures. Review privacy before using this profile elsewhere.
+
 ## Repeated effective module identities
 
 Test-package scans and replacement resolution can report the same effective
