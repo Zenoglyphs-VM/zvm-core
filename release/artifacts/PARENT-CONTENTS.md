@@ -115,3 +115,15 @@ and local-Core subject fixtures. Ordinary hosted source CI cannot establish
 that fixture qualification through skipped tests. Actual service/platform
 outputs, accepted recipes/images/toolchains, project attestations, distribution,
 reproduction and maintainer/owner release acceptance remain separate D02 gates.
+
+## Original Core qualification record
+
+The [darwin/arm64 Core record](qualification/core-parent-contents-darwin-arm64.json)
+binds all 137 regular files of the executable's original selected source tree
+and its raw commit control. It uses the exact manifest, selection policy,
+Go-profile controls, executable and SPDX from previously qualified observations.
+Seven CLI observations cover positive/repeat/legacy modes and four refusals.
+The legacy receipt does not report parent verification. No new build or package is
+produced, and prior schema/archive results are retained under their original
+byte pins and qualification context. Parent-source equality does not prove
+compiler use, source authority, reproducibility or release acceptance.

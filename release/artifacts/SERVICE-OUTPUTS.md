@@ -179,3 +179,28 @@ The context is synthetic. Project signing, accepted recipes/toolchains/images,
 additional supported platforms, runtime/license coverage, independent
 reproduction and owner/operator release acceptance remain open. All five
 original D02 adopters retain their original acceptance requirements.
+
+## Original Core parent-source observation
+
+The [Core parent-contents record](qualification/core-parent-contents-darwin-arm64.json)
+adds an explicit complete source observation for the retained darwin/arm64 Core
+executable at `89b482274f17a4d585aebd1324dce328663b93d3`. Its 137 regular files
+and raw commit control reconstruct the selected tree and commit. The contents
+consumer also checks the same executable, exact SPDX bytes, module/lock inputs
+and 80 remote module records. Two positive receipts are byte-identical; legacy
+mode does not report parent-source verification. Four negative controls refuse an
+incorrect policy digest, another valid source revision, an unselected artifact
+and changed SPDX content despite consistent file hashes.
+
+The earlier SPDX profile, official schema and canonical archive observations
+are reused only for their original bytes. Their manifest and selection policy
+match this new contents observation. This step performs no build, SPDX
+generation, schema rerun, archive production, dependency download or service
+execution. Historical enclosing failures and their later successful result
+reconciliation remain separate from this new successful qualification.
+
+The complete source observation does not prove compiler use of every file,
+source/toolchain origin, independent build reproduction or current-head
+compilation. The historical VCS/build context remains unchanged. Signing,
+additional supported platforms and owner/operator release acceptance remain
+open under the original D02 requirements.
