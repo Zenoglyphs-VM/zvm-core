@@ -129,3 +129,26 @@ project signature or accepted release was created. The separate receipt fields
 keep parent/source observation, SPDX contents and archive-format verification
 distinct. Linux images, additional supported platforms, runtime/license coverage,
 independent reproduction and maintainer/owner release gates remain open.
+
+## Bridge SPDX schema and semantic checks
+
+The [Bridge package record](qualification/bridge-package-darwin-arm64.json) also
+records a new official-schema check of the exact retained 98,068-byte SPDX
+document. Pinned SPDX 2.3.1 schema bytes are compiled with Ajv2019 8.17.1 using
+the schema's declared 2019-09 dialect. The original document passes, and six
+malformed controls are refused. Only 478,592 selected JS/JSON bytes are extracted
+from five retained, checksum-pinned validator packages; no install or network
+resolution occurs.
+
+A changed artifact checksum still passes the JSON schema. The same changed
+document is then refused by the actual Go semantic-profile checker, while the
+original document passes against the exact subject, module/lock inputs and 112
+Core source files. This separates document shape from subject/source binding.
+The existing Node runtime had changed since the earlier schema observation;
+this new check pins and records the current runtime rather than reusing the old
+runtime result. No source/toolchain authority or accepted release is established.
+
+The service, SPDX and archive are not rebuilt, regenerated or distributed by
+this addition. All earlier native, contents, archive and failed-preparation
+observations retain their own scope and receipts. Runtime/license coverage,
+independent reproduction and project signing/release acceptance remain open.
