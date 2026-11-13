@@ -130,3 +130,13 @@ trigger, retry, signing or release path is added.
 Protocol and limits: [govulncheck v1.9.0](https://pkg.go.dev/golang.org/x/vuln/cmd/govulncheck@v1.9.0),
 [stream protocol](https://github.com/golang/vuln/blob/e672cbe8fbc8c76e28fcb6db0efd9ce354e0dac5/internal/govulncheck/govulncheck.go),
 and [Go vulnerability database](https://go.dev/doc/security/vuln/database).
+
+## Repeated effective module identities
+
+Test-package scans and replacement resolution can report the same effective
+module path/version more than once. The consumer records the raw occurrence
+count and counts distinct path/version pairs separately. Different versions
+remain separate records. This normalization applies only to the scan inventory;
+it does not remove findings, collapse their levels or merge advisory revisions.
+An initial complete producer stream that exercised this case remains retained
+under its original source/attempt; consumer replay is separate from a new scan.

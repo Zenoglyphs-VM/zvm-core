@@ -142,8 +142,8 @@ def summarize(raw, *, go_version, mode="source", scanner_version=SCANNER_VERSION
                     raise ReviewError("invalid inventory module")
                 path = text_field(module, "path", required=True)
                 version = text_field(module, "version", maximum=256)
-                if not portable(path) or (path, version) in selected:
-                    raise ReviewError("invalid or duplicate inventory module")
+                if not portable(path):
+                    raise ReviewError("invalid inventory module")
                 selected.add((path, version))
             sbom = value
         elif kind == "osv":
@@ -212,7 +212,9 @@ def summarize(raw, *, go_version, mode="source", scanner_version=SCANNER_VERSION
     return {"schema": 1, "status": "REVIEW_REQUIRED" if findings else "NO_FINDINGS_REPORTED_IN_THIS_SCAN",
         "scannerVersion": scanner_version, "scanMode": mode, "scanLevel": "symbol", "analysisGoVersion": go_version,
         "database": database, "databaseModifiedObserved": config["db_last_modified"],
-        "databaseSnapshotAuthenticated": False, "messages": count, "moduleRecords": len(sbom["modules"]),
+        "databaseSnapshotAuthenticated": False, "messages": count, "moduleRecords": len(selected),
+        "moduleRecordOccurrences": len(sbom["modules"]),
+        "duplicateModuleRecordOccurrences": len(sbom["modules"]) - len(selected),
         "roots": sorted(sbom["roots"]), "advisoryRecords": len(advisories), "advisoryDigests": dict(sorted(advisories.items())),
         "uniqueFindingAdvisories": len({row["id"] for row in findings}), "findingOccurrencesByLevel": levels,
         "findings": sorted(distinct.values(), key=lambda row: (row["id"], row["module"], row["package"], row["level"])),

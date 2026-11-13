@@ -102,6 +102,25 @@ class ProtocolTests(unittest.TestCase):
                 rows = stream(); rows[1]["SBOM"][key] = value
                 self.reject(rows)
 
+    def test_repeated_effective_replacement_record_is_counted_once(self):
+        # This pair was repeated in the actual v1.9.0 test-package scan.
+        rows = stream()
+        effective = {"path": "github.com/ethereum-optimism/op-geth", "version": "v1.101702.2"}
+        rows[1]["SBOM"]["modules"] = [effective, copy.deepcopy(effective)]
+        result = self.summary(rows)
+        self.assertEqual(result["moduleRecords"], 1)
+        self.assertEqual(result["moduleRecordOccurrences"], 2)
+        self.assertEqual(result["duplicateModuleRecordOccurrences"], 1)
+
+    def test_distinct_effective_versions_remain_separate(self):
+        rows = stream()
+        rows[1]["SBOM"]["modules"] = [{"path": "example.org/module", "version": "v1.0.0"},
+            {"path": "example.org/module", "version": "v2.0.0"}]
+        result = self.summary(rows)
+        self.assertEqual(result["moduleRecords"], 2)
+        self.assertEqual(result["moduleRecordOccurrences"], 2)
+        self.assertEqual(result["duplicateModuleRecordOccurrences"], 0)
+
     def test_missing_advisory_reference_refused(self):
         self.reject(stream(finding()))
 
